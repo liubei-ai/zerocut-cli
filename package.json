@@ -1,0 +1,52 @@
+{
+  "name": "zerocut-cli",
+  "version": "0.1.0",
+  "description": "ZeroCut CLI: AI assistant CLI for creating and editing images/audio/video",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "zerocut": "dist/bin/zerocut.js",
+    "zerocut-cli": "dist/bin/zerocut.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write .",
+    "dev": "ts-node src/bin/zerocut.ts"
+  },
+  "keywords": [
+    "cli",
+    "zerocut"
+  ],
+  "author": "liubei-ai",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/liubei-ai/zerocut-cli.git"
+  },
+  "homepage": "https://github.com/liubei-ai/zerocut-cli#readme",
+  "bugs": {
+    "url": "https://github.com/liubei-ai/zerocut-cli/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.0",
+    "@typescript-eslint/eslint-plugin": "^8.54.0",
+    "@typescript-eslint/parser": "^8.54.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "prettier": "^3.8.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.54.0"
+  },
+  "dependencies": {
+    "cerevox": "^4.1.1",
+    "commander": "^14.0.3",
+    "inquirer": "^13.2.2"
+  }
+}

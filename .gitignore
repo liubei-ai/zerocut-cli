@@ -1,0 +1,28 @@
+# Node.js
+node_modules/
+dist/
+coverage/
+*.log
+pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TypeScript
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# OS / Editor
+.DS_Store
+.vscode/
+.idea/
+
+# Trae IDE metadata
+.trae/
+
+# Zerocut local data (fallback config)
+.zerocut/
