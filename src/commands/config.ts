@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import fs from "node:fs";
 import readline from "node:readline";
-import { setConfigValueSync } from "../services/config";
+import { readConfigSync, setConfigValueSync } from "../services/config";
 
 export const name = "config";
 export const description = "Configuration management";
@@ -32,9 +32,9 @@ export function register(program: Command): void {
 
   parent
     .command("apiKey [key]")
-    .description("Set API key (get one at workspace.zerocut.cn)")
+    .description("Set API key (get one at workspace.zerocut.art)")
     .action(async (key?: string) => {
-      const value = (key ?? (await ask("Enter API key (get one at workspace.zerocut.cn)"))).trim();
+      const value = (key ?? (await ask("Enter API key (get one at workspace.zerocut.art)"))).trim();
       if (value.length === 0) return;
       setConfigValueSync("apiKey", value);
       process.stdout.write("apiKey set\n");
@@ -52,5 +52,34 @@ export function register(program: Command): void {
       }
       setConfigValueSync("projectDir", target);
       process.stdout.write("projectDir set\n");
+    });
+
+  parent
+    .command("region [region]")
+    .description("Set region (us|cn; default: us)")
+    .action((region?: string) => {
+      const allowed = ["us", "cn"] as const;
+      const value = (region ?? "us").toLowerCase();
+      if (!(allowed as readonly string[]).includes(value)) {
+        process.stderr.write(`Invalid region: ${value}. Allowed: us|cn\n`);
+        process.exitCode = 1;
+        return;
+      }
+      setConfigValueSync("region", value);
+      process.stdout.write("region set\n");
+    });
+
+  parent
+    .command("list")
+    .description("List current configuration values")
+    .action(() => {
+      const cfg = readConfigSync() as Record<string, unknown>;
+      const masked = { ...cfg } as Record<string, unknown>;
+      const k = masked.apiKey;
+      if (typeof k === "string" && k.length > 0) {
+        const visible = k.slice(-4);
+        masked.apiKey = `${"*".repeat(Math.max(0, k.length - 4))}${visible}`;
+      }
+      process.stdout.write(`${JSON.stringify(masked, null, 2)}\n`);
     });
 }

@@ -8,6 +8,7 @@ import { openSession, closeSession, attachSessionToCommand, SESSION_SYMBOL } fro
 export interface ZerocutConfig {
   apiKey: string;
   projectDir: string;
+  region?: "us" | "cn";
 }
 
 export function configPath(): string {
@@ -183,6 +184,7 @@ export async function setConfigValue(key: string, value: unknown): Promise<void>
 export async function ensureConfig(): Promise<boolean> {
   const apiKey = getConfigValueSync("apiKey");
   const projectDir = getConfigValueSync("projectDir");
+  const region = getConfigValueSync("region");
   const missing: string[] = [];
   if (typeof apiKey !== "string" || apiKey.trim().length === 0) missing.push("apiKey");
   if (typeof projectDir !== "string" || projectDir.trim().length === 0) missing.push("projectDir");
@@ -191,6 +193,9 @@ export async function ensureConfig(): Promise<boolean> {
       `Missing required configuration: ${missing.join(", ")}\nConfigure using:\n  zerocut config apiKey <key>\n  zerocut config projectDir <dir>\n`
     );
     return false;
+  }
+  if (region !== "us" && region !== "cn") {
+    setConfigValueSync("region", "us");
   }
   return true;
 }
@@ -220,6 +225,7 @@ export function applyConfigInterceptor(program: Command): void {
       };
       const session = cmd?.[SESSION_SYMBOL];
       if (session) await closeSession(session);
+      process.exit(0);
     } catch {}
   });
 }
