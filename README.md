@@ -79,6 +79,7 @@ Configure using:
 - Keys:
   - `apiKey`: string
   - `projectDir`: absolute directory path
+  - `region`: environment region, one of `us` or `cn` (default: `us`)
 - Key-path API (internal): `getConfigValueSync('a.b')`, `setConfigValueSync('a.b.c','value')`
 - On filesystem permission errors while writing to the home directory, the project may fall back to `./.zerocut/config.json`.
 
@@ -89,6 +90,8 @@ Both config subcommands accept optional arguments and will prompt if omitted:
 ```bash
 zerocut config apiKey                 # prompts: Enter API key (get one at workspace.zerocut.cn)
 zerocut config projectDir             # prompts: Enter project directory [~/zerocut-projects/default]
+zerocut config region [region]        # set region (us|cn); default us
+zerocut config list                   # print masked configuration
 ```
 
 ## Commands
@@ -101,10 +104,13 @@ zerocut config projectDir             # prompts: Enter project directory [~/zero
   - `create` — create a new image; requires `--prompt`
     - Options:
       - `--prompt <prompt>` (required)
+      - `--type <type>` (seedream|seedream-pro|banana|banana-pro|wan)
       - `--size <size>` (e.g., 512x512)
       - `--refs <img1,img2,...>` (comma-separated paths/URLs)
       - `--output <file>` (output file path)
   - `edit` — edit an existing image by applying modifications
+  - Notes:
+    - During image generation, CLI displays a lightweight spinner-based progress indicator to show that inference is running.
 - `audio` — audio commands (parent) — planned
   - `create` — synthesize or compose audio from text or references — planned
   - `edit` — trim, mix, or apply effects to existing audio — planned
@@ -116,7 +122,7 @@ zerocut config projectDir             # prompts: Enter project directory [~/zero
 
 ```bash
 # Create an image
-zerocut image create --prompt "a cat" --size 512x512 --refs ref1.png,ref2.jpg --output out.png
+zerocut image create --prompt "a cat" --type seedream --size 512x512 --refs ref1.png,ref2.jpg --output out.png
 
 # Edit an image (placeholder)
 zerocut image edit
