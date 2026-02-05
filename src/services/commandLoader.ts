@@ -2,6 +2,7 @@ import { Command } from "commander";
 import { register as registerHelp } from "../commands/help";
 import { register as registerImage } from "../commands/image";
 import { register as registerConfig } from "../commands/config";
+import { register as registerVideo } from "../commands/video";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -9,6 +10,7 @@ export function loadBuiltInCommands(program: Command): void {
   registerHelp(program);
   registerConfig(program);
   registerImage(program);
+  registerVideo(program);
 }
 
 export async function loadExternalCommandsAsync(program: Command, dir?: string): Promise<void> {

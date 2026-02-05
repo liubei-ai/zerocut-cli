@@ -13,7 +13,7 @@ ZeroCut CLI is a modular, extensible command-line toolkit that lets an AI assist
 - Session lifecycle management using Cerevox (open on preAction, close on postAction)
 - Strict TypeScript, ESLint + Prettier, pnpm-based project
 
-Note: Image commands are implemented. Audio and video commands are planned and will be added next.
+Note: Image commands are implemented. Video commands are available with placeholder implementations and validated parameters. Audio commands are planned.
 
 ## Requirements
 
@@ -28,11 +28,8 @@ Note: Image commands are implemented. Audio and video commands are planned and w
 # pnpm global install (preferred)
 pnpm add -g zerocut-cli
 
-# npm global install (alternative)
-npm i -g zerocut-cli
-
 # Run directly without installing
-npx -y zerocut-cli help
+pnpm dlx zerocut-cli help
 ```
 
 ### Local Development
@@ -81,7 +78,7 @@ Configure using:
   - `projectDir`: absolute directory path
   - `region`: environment region, one of `us` or `cn` (default: `us`)
 - Key-path API (internal): `getConfigValueSync('a.b')`, `setConfigValueSync('a.b.c','value')`
-- On filesystem permission errors while writing to the home directory, the project may fall back to `./.zerocut/config.json`.
+
 
 ### Interactive configuration
 
@@ -100,6 +97,8 @@ zerocut config list                   # print masked configuration
 - `config` — configuration management (parent)
   - `apiKey [key]` — set API key (prompts if omitted)
   - `projectDir [dir]` — set project directory (prompts if omitted; creates directory if missing)
+  - `region [region]` — set region (`us|cn`; default `us`)
+  - `list` — print masked configuration
 - `image` — image commands (parent)
   - `create` — create a new image; requires `--prompt`
     - Options:
@@ -109,14 +108,42 @@ zerocut config list                   # print masked configuration
       - `--refs <img1,img2,...>` (comma-separated paths/URLs)
       - `--output <file>` (output file path)
   - `edit` — edit an existing image by applying modifications
+    - Options:
+      - `--source <source>` (required; inserted to refs list head)
+      - `--prompt <prompt>` (required)
+      - `--type <type>` (same enum as create)
+      - `--size <size>`
+      - `--refs <img1,img2,...>`
+      - `--output <file>`
   - Notes:
     - During image generation, CLI displays a lightweight spinner-based progress indicator to show that inference is running.
 - `audio` — audio commands (parent) — planned
   - `create` — synthesize or compose audio from text or references — planned
   - `edit` — trim, mix, or apply effects to existing audio — planned
-- `video` — video commands (parent) — planned
-  - `create` — generate video from prompt and references — planned
-  - `edit` — cut, merge, and apply effects — planned
+- `video` — video commands (parent)
+  - `create` — generate video from prompt and references (placeholder implementation)
+    - Options:
+      - `--prompt <prompt>` (required)
+      - `--duration <seconds>` (integer 1–16)
+      - `--type <type>` (enum: `sora2|sora2-pro|veo3.1|veo3.1-pro|wan|vidu|vidu-pro|seedance|kling`; default `vidu`)
+      - `--seed <seed>`
+      - `--firstFrame <image>`
+      - `--lastFrame <image>`
+      - `--refs <assets>`
+      - `--resolution <resolution>`
+      - `--aspectRatio <ratio>`
+      - `--withAudio`
+      - `--optimizeCameraMotion`
+      - `--output <file>`
+  - `edit` — apply modifications to an existing video (placeholder implementation)
+    - Options:
+      - `--source <source>` (required)
+      - `--prompt <prompt>` (required)
+      - `--type <type>` (enum: `edit|lipsync|extend|upscale`)
+      - `--duration <seconds>` (integer 1–16)
+      - `--resolution <resolution>` (enum: `720p|1080p|2K|4K`)
+      - `--refs <assets>`
+      - `--output <file>`
 
 ### Examples
 
@@ -124,21 +151,14 @@ zerocut config list                   # print masked configuration
 # Create an image
 zerocut image create --prompt "a cat" --type seedream --size 512x512 --refs ref1.png,ref2.jpg --output out.png
 
-# Edit an image (placeholder)
-zerocut image edit
-
-# Planned examples (coming soon)
-# Create audio
-zerocut audio create --prompt "ambient music" --length 30s --output track.wav
-
-# Edit audio
-zerocut audio edit --input track.wav --trim 00:00-00:30 --output trimmed.wav
+# Edit an image
+zerocut image edit --source base.png --prompt "make it vintage" --type banana-pro --refs mask.png --output edited.png
 
 # Create video
-zerocut video create --prompt "a sunrise timelapse" --refs frame1.png,frame2.png --output movie.mp4
+zerocut video create --prompt "city night drive" --duration 12 --type vidu --refs frame1.png,frame2.png --resolution 720p --output movie.mp4
 
 # Edit video
-zerocut video edit --input movie.mp4 --cut 00:00-00:10 --merge intro.mp4 --output final.mp4
+zerocut video edit --source movie.mp4 --prompt "brighten" --type edit --duration 8 --resolution 1080p --refs mask.png --output final.mp4
 ```
 
 ## Dynamic External Commands
