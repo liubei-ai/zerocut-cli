@@ -7,6 +7,24 @@ import { createProgressSpinner } from "../utils/progress";
 export const name = "video";
 export const description = "Video command: create video";
 
+function resolveResultUrl(result: unknown): string | undefined {
+  if (!result || typeof result !== "object") {
+    return undefined;
+  }
+  const record = result as Record<string, unknown>;
+  if (typeof record.url === "string" && record.url.length > 0) {
+    return record.url;
+  }
+  const data = record.data;
+  if (data && typeof data === "object") {
+    const dataRecord = data as Record<string, unknown>;
+    if (typeof dataRecord.url === "string" && dataRecord.url.length > 0) {
+      return dataRecord.url;
+    }
+  }
+  return undefined;
+}
+
 export function register(program: Command): void {
   const parent = program.command("video").description("Create a new video; requires --prompt");
 
@@ -137,11 +155,12 @@ export function register(program: Command): void {
         : undefined,
       onProgress: createProgressSpinner("inferencing"),
     });
+    const initialUrl = resolveResultUrl(res);
     try {
-      if (res?.url) {
-        const tosUrl = await syncToTOS(res.url as string);
+      if (initialUrl) {
+        const tosUrl = await syncToTOS(initialUrl);
         if (tosUrl) {
-          res.url = tosUrl;
+          (res as Record<string, unknown>).url = tosUrl;
         }
       }
     } catch {}
@@ -149,7 +168,15 @@ export function register(program: Command): void {
     const output = typeof opts.output === "string" ? opts.output : undefined;
     if (output) {
       const dir = process.cwd();
-      const url = res.url;
+      const url = resolveResultUrl(res);
+      if (!url) {
+        process.stderr.write(
+          "Cannot save --output because no video URL was returned. Please retry later or run without --output to inspect raw response.\n"
+        );
+        process.exitCode = 1;
+        console.log(res);
+        return;
+      }
       const response = await fetch(url);
       const buffer = Buffer.from(await response.arrayBuffer());
       const filePath = path.resolve(dir, output);
