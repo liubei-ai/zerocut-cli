@@ -67,8 +67,8 @@ export async function getMaterialUri(session: Session, fileNameOrUrl: string) {
     return fileNameOrUrl;
   }
   const fileName = fileNameOrUrl;
-  const projectLocalDir = getConfigValueSync("projectDir") as string;
-  const localPath = resolve(projectLocalDir, "materials", fileName);
+  const cwd = process.cwd();
+  const localPath = resolve(cwd, "materials", fileName);
   const hash = await computeSha256(localPath);
   const url = session.sandbox.getUrl(
     `/zerocut/${session.terminal.id}/materials/${basename(fileName)}`

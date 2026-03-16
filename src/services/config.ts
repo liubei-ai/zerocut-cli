@@ -7,7 +7,6 @@ import { openSession, closeSession, attachSessionToCommand, SESSION_SYMBOL } fro
 
 export interface ZerocutConfig {
   apiKey: string;
-  projectDir: string;
   region?: "us" | "cn";
 }
 
@@ -183,14 +182,14 @@ export async function setConfigValue(key: string, value: unknown): Promise<void>
 
 export async function ensureConfig(): Promise<boolean> {
   const apiKey = getConfigValueSync("apiKey");
-  const projectDir = getConfigValueSync("projectDir");
   const region = getConfigValueSync("region");
   const missing: string[] = [];
   if (typeof apiKey !== "string" || apiKey.trim().length === 0) missing.push("apiKey");
-  if (typeof projectDir !== "string" || projectDir.trim().length === 0) missing.push("projectDir");
   if (missing.length > 0) {
     process.stderr.write(
-      `Missing required configuration: ${missing.join(", ")}\nConfigure using:\n  zerocut config apiKey <key>\n  zerocut config projectDir <dir>\n`
+      `Missing required configuration: ${missing.join(
+        ", "
+      )}\nConfigure using:\n  zerocut config key <key>\n  or:\n  zerocut config --ott <token> --region <cn|us>\n`
     );
     return false;
   }

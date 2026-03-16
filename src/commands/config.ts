@@ -1,20 +1,9 @@
 import type { Command } from "commander";
-import os from "node:os";
-import path from "node:path";
-import fs from "node:fs";
 import readline from "node:readline";
 import { readConfigSync, setConfigValueSync } from "../services/config";
 
 export const name = "config";
 export const description = "Configuration management";
-
-function expandHome(input: string): string {
-  if (!input) return input;
-  if (input.startsWith("~")) {
-    return path.join(os.homedir(), input.slice(1));
-  }
-  return input;
-}
 
 async function ask(question: string, defaults?: string): Promise<string> {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -124,22 +113,6 @@ export function register(program: Command): void {
         process.exitCode = 1;
       }
     });
-
-  parent
-    .command("projectDir [dir]")
-    .description("Set project directory (will be created if missing)")
-    .action(async (dir?: string) => {
-      const placeholder = "~/zerocut-projects/default";
-      const value = dir ?? (await ask("Enter project directory", placeholder));
-      const target = path.resolve(expandHome(value.trim()));
-      if (!fs.existsSync(target)) {
-        fs.mkdirSync(target, { recursive: true });
-      }
-      setConfigValueSync("projectDir", target);
-      process.stdout.write("projectDir set\n");
-    });
-
-  // region is chosen during key setup or via quick flags on `config --ott --region`
 
   parent
     .command("list")

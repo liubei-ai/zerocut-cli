@@ -1,6 +1,5 @@
 import type { Command } from "commander";
 import { getMaterialUri, getSessionFromCommand } from "../services/cerevox";
-import { getConfigValue } from "../services/config";
 import fs from "node:fs";
 import path from "node:path";
 import { createProgressSpinner } from "../utils/progress";
@@ -117,7 +116,7 @@ export function register(program: Command): void {
         process.stdout.write("\n");
         const output = typeof opts.output === "string" ? opts.output : undefined;
         if (output) {
-          const dir = (await getConfigValue("projectDir")) as string;
+          const dir = process.cwd();
           const url = res.url;
           const response = await fetch(url);
           const buffer = Buffer.from(await response.arrayBuffer());
@@ -168,7 +167,7 @@ export function register(program: Command): void {
         process.stdout.write("\n");
         const output = typeof opts.output === "string" ? opts.output : undefined;
         if (output) {
-          const dir = (await getConfigValue("projectDir")) as string;
+          const dir = process.cwd();
           const url = res.url;
           const response = await fetch(url);
           const buffer = Buffer.from(await response.arrayBuffer());
@@ -316,7 +315,7 @@ export function register(program: Command): void {
       process.stdout.write("\n");
       const output = typeof opts.output === "string" ? opts.output : undefined;
       if (output) {
-        const dir = (await getConfigValue("projectDir")) as string;
+        const dir = process.cwd();
         const url = res.url;
         const response = await fetch(url);
         const buffer = Buffer.from(await response.arrayBuffer());

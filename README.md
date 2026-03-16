@@ -9,7 +9,7 @@ ZeroCut CLI is a modular, extensible command-line toolkit that lets an AI assist
 - Media creation and editing for images, audio, and video
 - Modular commands (one file per command under `src/commands/*`)
 - Dynamic external command loading via `ZEROCUT_COMMANDS_DIR` (.js/.cjs files)
-- Configuration interceptor that validates required keys (`apiKey`, `projectDir`)
+- Configuration interceptor that validates required keys (`apiKey`)
 - Session lifecycle management using Cerevox (open on preAction, close on postAction)
 - Strict TypeScript, ESLint + Prettier, pnpm-based project
 
@@ -57,17 +57,19 @@ zerocut help
 - Configure required settings:
 
 ```bash
-zerocut config apiKey <key>         # Get an API key at https://workspace.zerocut.cn/
-zerocut config projectDir <dir>     # Will be created if missing
+zerocut config key <key>            # Or use OTT exchange below
+# quick OTT exchange:
+zerocut config --ott <token> --region <cn|us>
 ```
 
 If configuration is missing, Zerocut prints:
 
 ```
-Missing required configuration: apiKey, projectDir
+Missing required configuration: apiKey
 Configure using:
-  zerocut config apiKey <key>
-  zerocut config projectDir <dir>
+  zerocut config key <key>
+or:
+  zerocut config --ott <token> --region <cn|us>
 ```
 
 ## Configuration
@@ -75,18 +77,18 @@ Configure using:
 - Config file primary path: `~/.zerocut/config.json`
 - Keys:
   - `apiKey`: string
-  - `projectDir`: absolute directory path
   - `region`: environment region, one of `us` or `cn` (default: `us`)
 - Key-path API (internal): `getConfigValueSync('a.b')`, `setConfigValueSync('a.b.c','value')`
 
 ### Interactive configuration
 
 Both config subcommands accept optional arguments and will prompt if omitted:
+Key setup supports direct input or OTT exchange:
 
 ```bash
 zerocut config apiKey                 # prompts: Enter API key (get one at workspace.zerocut.cn)
-zerocut config projectDir             # prompts: Enter project directory [~/zerocut-projects/default]
-zerocut config list                   # print masked configuration
+zerocut config key                   # prompts: choose region (cn/us), then enter OTT
+zerocut config --ott <token> --region <cn|us>   # non-interactive
 ```
 
 ## Commands
@@ -94,8 +96,8 @@ zerocut config list                   # print masked configuration
 - `help` — show available commands
 - `config` — configuration management (parent)
   - `apiKey [key]` — set API key (prompts if omitted)
-  - `projectDir [dir]` — set project directory (prompts if omitted; creates directory if missing)
-  - `list` — print masked configuration
+  - `key [key]` — set API key (prompts if omitted; supports OTT exchange)
+- `image` — create a new image (default action; requires `--prompt`)
 - `image` — create a new image (default action; requires `--prompt`)
   - Options:
     - `--prompt <prompt>` (required)

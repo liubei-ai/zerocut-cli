@@ -2,7 +2,6 @@ import type { Command } from "commander";
 import fs from "node:fs";
 import path from "node:path";
 import { getMaterialUri, getSessionFromCommand } from "../services/cerevox";
-import { getConfigValue } from "../services/config";
 import type { Session } from "cerevox";
 import { createProgressSpinner } from "../utils/progress";
 
@@ -44,7 +43,7 @@ export function register(program: Command): void {
     });
     process.stdout.write("\n");
     if (output) {
-      const dir = (await getConfigValue("projectDir")) as string;
+      const dir = process.cwd();
       const url = res.urls[0];
       const response = await fetch(url);
       const buffer = Buffer.from(await response.arrayBuffer());
