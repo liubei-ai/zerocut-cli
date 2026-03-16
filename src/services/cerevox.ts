@@ -121,12 +121,14 @@ export async function syncToTOS(url: string): Promise<string> {
   const contentType = fileRes.headers.get("content-type") || "application/octet-stream";
   const map: Record<string, string> = {
     "audio/mpeg": "mp3",
+    "audio/mpga": "mp3",
     "audio/wav": "wav",
     "audio/x-wav": "wav",
     "audio/flac": "flac",
     "audio/ogg": "ogg",
     "audio/webm": "webm",
     "video/mp4": "mp4",
+    "video/mpeg": "mp4",
     "video/quicktime": "mov",
     "video/webm": "webm",
     "image/png": "png",
