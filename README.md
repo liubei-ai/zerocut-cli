@@ -79,7 +79,6 @@ Configure using:
   - `region`: environment region, one of `us` or `cn` (default: `us`)
 - Key-path API (internal): `getConfigValueSync('a.b')`, `setConfigValueSync('a.b.c','value')`
 
-
 ### Interactive configuration
 
 Both config subcommands accept optional arguments and will prompt if omitted:
@@ -87,7 +86,6 @@ Both config subcommands accept optional arguments and will prompt if omitted:
 ```bash
 zerocut config apiKey                 # prompts: Enter API key (get one at workspace.zerocut.cn)
 zerocut config projectDir             # prompts: Enter project directory [~/zerocut-projects/default]
-zerocut config region [region]        # set region (us|cn); default us
 zerocut config list                   # print masked configuration
 ```
 
@@ -97,7 +95,6 @@ zerocut config list                   # print masked configuration
 - `config` — configuration management (parent)
   - `apiKey [key]` — set API key (prompts if omitted)
   - `projectDir [dir]` — set project directory (prompts if omitted; creates directory if missing)
-  - `region [region]` — set region (`us|cn`; default `us`)
   - `list` — print masked configuration
 - `image` — create a new image (default action; requires `--prompt`)
   - Options:
