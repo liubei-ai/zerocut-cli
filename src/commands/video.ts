@@ -11,15 +11,20 @@ export function register(program: Command): void {
   const parent = program.command("video").description("Create a new video; requires --prompt");
 
   const allowedTypes = [
+    "zerocut3.0",
+    "seedance-1.5-pro",
+    "vidu",
+    "vidu-pro",
+    "viduq3",
+    "viduq3-turbo",
+    "kling",
+    "kling-v3",
+    "wan",
+    "wan-flash",
     "sora2",
     "sora2-pro",
     "veo3.1",
     "veo3.1-pro",
-    "wan",
-    "vidu",
-    "vidu-pro",
-    "seedance",
-    "kling",
   ] as const;
 
   async function videoCreateAction(

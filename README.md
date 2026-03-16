@@ -109,7 +109,7 @@ zerocut config --ott <token> --region <cn|us>   # non-interactive
     - Options:
       - `--prompt <prompt>` (required)
       - `--duration <seconds>` (integer 1–16)
-      - `--type <type>` (enum: `sora2|sora2-pro|veo3.1|veo3.1-pro|wan|vidu|vidu-pro|seedance|kling`; default `vidu`)
+    - `--type <type>` (enum: `zerocut3.0|seedance-1.5-pro|vidu|vidu-pro|viduq3|viduq3-turbo|kling|kling-v3|wan|wan-flash|sora2|sora2-pro|veo3.1|veo3.1-pro`; default `vidu`)
       - `--seed <seed>`
       - `--firstFrame <image>`
       - `--lastFrame <image>`
