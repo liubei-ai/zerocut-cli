@@ -32,12 +32,54 @@ export function register(program: Command): void {
 
   parent
     .command("apiKey [key]")
-    .description("Set API key (get one at workspace.zerocut.art)")
+    .description(
+      "Set API key. If omitted, enter a One-Time Token (OTT) to exchange for an API key."
+    )
     .action(async (key?: string) => {
-      const value = (key ?? (await ask("Enter API key (get one at workspace.zerocut.art)"))).trim();
-      if (value.length === 0) return;
-      setConfigValueSync("apiKey", value);
-      process.stdout.write("apiKey set\n");
+      const direct = typeof key === "string" ? key.trim() : "";
+      if (direct.length > 0) {
+        setConfigValueSync("apiKey", direct);
+        process.stdout.write("apiKey set\n");
+        return;
+      }
+      const ott = (await ask("Enter One-Time Token (OTT)")).trim();
+      if (!ott) {
+        process.stderr.write("OTT is required when no apiKey is provided\n");
+        process.exitCode = 1;
+        return;
+      }
+      try {
+        const resp = await fetch(
+          "https://resource.zerocut.cn/coze-upload/1m7ozcj5pg/sm7vckqr.png",
+          {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+            },
+            body: JSON.stringify({ ott }),
+          }
+        );
+        if (!resp.ok) {
+          process.stderr.write(`OTT exchange failed: HTTP ${resp.status}\n`);
+          process.exitCode = 1;
+          return;
+        }
+        const json = (await resp.json()) as {
+          data?: { apiKey?: string };
+          [k: string]: unknown;
+        };
+        const apiKey = json?.data?.apiKey;
+        if (typeof apiKey !== "string" || apiKey.length === 0) {
+          process.stderr.write("OTT exchange failed: missing data.apiKey in response\n");
+          process.exitCode = 1;
+          return;
+        }
+        setConfigValueSync("apiKey", apiKey);
+        process.stdout.write("apiKey set via OTT\n");
+      } catch (err) {
+        process.stderr.write(`OTT exchange failed: ${(err as Error).message}\n`);
+        process.exitCode = 1;
+      }
     });
 
   parent
