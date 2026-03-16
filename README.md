@@ -115,7 +115,7 @@ zerocut config --ott <token> --region <cn|us>   # non-interactive
       - `--lastFrame <image>`
       - `--refs <assets>`
       - `--resolution <resolution>`
-      - `--aspectRatio <ratio>`
+      - `--aspectRatio <ratio>` (9:16|16:9|1:1)
       - `--withAudio`
       - `--optimizeCameraMotion`
       - `--output <file>`

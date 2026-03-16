@@ -38,7 +38,7 @@ export function register(program: Command): void {
       lastFrame?: string;
       refs?: string;
       resolution?: "720p" | "1080p";
-      aspectRatio?: "9:16" | "16:9";
+      aspectRatio?: "9:16" | "16:9" | "1:1";
       withAudio?: boolean;
       optimizeCameraMotion?: boolean;
       output?: string;
@@ -75,6 +75,16 @@ export function register(program: Command): void {
       }
       duration = n;
     }
+    const allowedAspectRatios = ["9:16", "16:9", "1:1"] as const;
+    const ar = typeof opts.aspectRatio === "string" ? opts.aspectRatio : undefined;
+    if (ar && !(allowedAspectRatios as readonly string[]).includes(ar)) {
+      process.stderr.write(
+        `Invalid value for --aspectRatio: ${ar}. Allowed: ${allowedAspectRatios.join("|")}\n`
+      );
+      process.exitCode = 1;
+      return;
+    }
+    const aspectRatio = ar as (typeof allowedAspectRatios)[number] | undefined;
     const images: {
       type: "first_frame" | "last_frame" | "reference" | "storyboard";
       url: string;
@@ -110,7 +120,7 @@ export function register(program: Command): void {
       model: model as (typeof allowedTypes)[number],
       duration: duration || undefined,
       resolution: opts.resolution,
-      aspect_ratio: opts.aspectRatio,
+      aspect_ratio: aspectRatio,
       mute: !opts.withAudio,
       optimize_camera: opts.optimizeCameraMotion,
       seed: opts.seed ? Number.parseInt(opts.seed, 10) : undefined,
@@ -144,7 +154,7 @@ export function register(program: Command): void {
     .option("--lastFrame <image>", "Last frame image path/url")
     .option("--refs <refs>", "Comma-separated reference image/video paths/urls")
     .option("--resolution <resolution>", "Resolution, e.g., 720p")
-    .option("--aspectRatio <ratio>", "Aspect ratio, e.g., 16:9")
+    .option("--aspectRatio <ratio>", "Aspect ratio: 9:16|16:9|1:1")
     .option("--withAudio", "Include audio track")
     .option("--optimizeCameraMotion", "Optimize camera motion")
     .option("--output <file>", "Output file path")
@@ -162,7 +172,7 @@ export function register(program: Command): void {
     .option("--lastFrame <image>", "Last frame image path/url")
     .option("--refs <refs>", "Comma-separated reference image/video paths/urls")
     .option("--resolution <resolution>", "Resolution, e.g., 720p")
-    .option("--aspectRatio <ratio>", "Aspect ratio, e.g., 16:9")
+    .option("--aspectRatio <ratio>", "Aspect ratio: 9:16|16:9|1:1")
     .option("--withAudio", "Include audio track")
     .option("--optimizeCameraMotion", "Optimize camera motion")
     .option("--output <file>", "Output file path")
