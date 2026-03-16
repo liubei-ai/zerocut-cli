@@ -44,6 +44,7 @@ Notes:
 
 - `region` must be `cn` or `us`
 - OTT exchange writes `apiKey` and `region` into config
+- when running `config key` without direct key, region must be `cn|us` and OTT is required
 
 ## Command Reference
 
@@ -65,6 +66,13 @@ Options:
 - `--refs <refs>` comma-separated local paths or URLs
 - `--output <file>` save generated file
 
+Validation rules:
+
+- `--prompt` must be non-empty
+- `--model` allowed: `seedream|seedream-pro|seedream-5l|banana|banana2|banana-pro|wan`
+- `--aspectRatio` allowed: `1:1|3:4|4:3|16:9|9:16|2:3|3:2|21:9|1:4|4:1|1:8|8:1`
+- `--resolution` allowed: `1K|2K|4K`
+
 ### video
 
 Default action: `create`
@@ -80,7 +88,7 @@ Options:
 - `--prompt <prompt>` required
 - `--model <model>`
 - `--duration <seconds>` integer in 1-16
-- `--sourceVideo <video>` base video for edit mode (requires duration 3-10)
+- `--sourceVideo <video>` base video for edit mode
 - `--seed <seed>`
 - `--firstFrame <image>`
 - `--lastFrame <image>`
@@ -90,6 +98,13 @@ Options:
 - `--withAudio`
 - `--optimizeCameraMotion`
 - `--output <file>`
+
+Validation rules:
+
+- `--prompt` must be non-empty
+- `--model` allowed: `zerocut3.0|seedance-1.5-pro|vidu|vidu-pro|viduq3|viduq3-turbo|kling|kling-v3|wan|wan-flash|sora2|sora2-pro|veo3.1|veo3.1-pro`
+- `--duration` must be integer in `1-16`
+- `--aspectRatio` allowed: `9:16|16:9|1:1`
 
 Long video guidance:
 
@@ -116,6 +131,10 @@ Options:
 - `--prompt <prompt>` required
 - `--output <file>`
 
+Validation rules:
+
+- `--prompt` must be non-empty
+
 ### tts
 
 Default action: `create`
@@ -132,6 +151,10 @@ Options:
 - `--voiceId <voiceId>`
 - `--output <file>`
 
+Validation rules:
+
+- `--text` must be non-empty
+
 ### ffmpeg
 
 ```bash
@@ -146,7 +169,8 @@ Options:
 
 Behavior:
 
-- command is validated to only allow `ffmpeg` or `ffprobe`
+- `--args` must be provided
+- command prefix is fixed as `ffmpeg`
 - for `ffmpeg`, `-y` is auto-injected when absent
 - output file is auto-downloaded from sandbox to local current directory
 
@@ -164,12 +188,22 @@ Options:
 
 Behavior:
 
-- command is validated to only allow `pandoc`
-- output file must be specified in args with `-o`, `--output`, or `--output=...`
-- output file is auto-downloaded from sandbox to local current directory
+- `--args` must be provided
+- command prefix is fixed as `pandoc`
+- output file is auto-downloaded only when args include `-o`, `--output`, or `--output=...`
 
 ## Output And Sync Rules
 
 - Media URLs from generation are synced to TOS when available.
 - `--output` saves files to an absolute path resolved from current working directory.
 - Missing parent directories for `--output` are created automatically.
+- File type constraints:
+  - image output uses `.png`
+  - video output uses `.mp4`
+  - audio output (`music`/`tts`) uses `.mp3`
+- If user does not explicitly provide output file name, agent must generate one in current directory:
+  - use 3-digit incremental prefix to avoid collisions, like `001_...`, `002_...`
+  - keep file name meaningful by task content, e.g. `001_city-night-drive.mp4`, `002_lofi-beat.mp3`
+- ffmpeg and pandoc outputs follow the same naming rule:
+  - if output path is not explicitly specified by user, agent should generate a meaningful file name with `NNN_` prefix and correct extension
+  - for pandoc, keep extension aligned with conversion target format

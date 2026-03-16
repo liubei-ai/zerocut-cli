@@ -123,7 +123,7 @@ export function register(program: Command): void {
       duration: duration || undefined,
       resolution: opts.resolution,
       aspect_ratio: aspectRatio,
-      mute: !opts.withAudio,
+      mute: !(opts.withAudio ?? true),
       optimize_camera: opts.optimizeCameraMotion,
       seed: opts.seed ? Number.parseInt(opts.seed, 10) : undefined,
       images: images.length > 0 ? images : undefined,
