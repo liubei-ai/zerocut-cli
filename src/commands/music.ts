@@ -29,16 +29,23 @@ export function register(program: Command): void {
       prompt,
       onProgress: createProgressSpinner("inferencing"),
     });
+    process.stdout.write("\n");
     try {
       if (res?.url) {
         const tosUrl = await syncToTOS(res.url as string);
+        console.log("---<", tosUrl);
         if (tosUrl) {
           res.url = tosUrl;
         }
       }
-    } catch {}
-    process.stdout.write("\n");
-    console.log(res);
+    } catch (ex: any) {
+      console.log(ex.message);
+    }
+    console.log({
+      url: res.url,
+      duration: res.duration,
+      usage: res.usage,
+    });
   }
 
   parent

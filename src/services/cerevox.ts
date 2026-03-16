@@ -103,25 +103,80 @@ export async function getMaterialUri(
   return url;
 }
 
+import { promises as fs } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { pipeline } from "node:stream/promises";
+import { createWriteStream } from "node:fs";
+
 export async function syncToTOS(url: string): Promise<string> {
   const api = "https://api.zerocut.cn/api/v1/upload/material";
   const apiKey = getApiKey();
-  const headers = {
-    Authorization: `Bearer ${apiKey}`,
-    "Content-Type": "multipart/form-data",
-  };
 
-  const buffer = await fetch(url).then((res) => res.arrayBuffer());
-
-  const formData = new FormData();
-  formData.append("file", new Blob([buffer], { type: "application/octet-stream" }));
-  const res = await fetch(api, {
-    method: "POST",
-    headers,
-    body: formData,
-  });
-  if (res.status !== 200) {
-    throw new Error(`Failed to upload to TOS. Details: ${res.statusText}`);
+  const fileRes = await fetch(url);
+  if (!fileRes.ok || !fileRes.body) {
+    throw new Error("Failed to fetch source file");
   }
-  return (await res.json()).data?.url || url;
+
+  const contentType = fileRes.headers.get("content-type") || "application/octet-stream";
+  const map: Record<string, string> = {
+    "audio/mpeg": "mp3",
+    "audio/wav": "wav",
+    "audio/x-wav": "wav",
+    "audio/flac": "flac",
+    "audio/ogg": "ogg",
+    "audio/webm": "webm",
+    "video/mp4": "mp4",
+    "video/quicktime": "mov",
+    "video/webm": "webm",
+    "image/png": "png",
+    "image/jpeg": "jpg",
+    "image/jpg": "jpg",
+    "image/webp": "webp",
+    "image/gif": "gif",
+    "application/pdf": "pdf",
+  };
+  let ext = map[contentType] || "";
+  if (!ext) {
+    try {
+      const u = new URL(url);
+      const p = u.pathname;
+      const i = p.lastIndexOf(".");
+      if (i !== -1 && i < p.length - 1) {
+        const e = p.substring(i + 1).toLowerCase();
+        if (/^[a-z0-9]{2,5}$/.test(e)) ext = e;
+      }
+    } catch {}
+  }
+  if (!ext) ext = "bin";
+
+  const tempPath = join(tmpdir(), `upload-${Date.now()}.bin`);
+
+  try {
+    await pipeline(fileRes.body as any, createWriteStream(tempPath));
+
+    const fileBuffer = await fs.readFile(tempPath);
+    const fileName = `file.${ext}`;
+    const file = new File([fileBuffer], fileName, { type: contentType });
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch(api, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: formData,
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to upload to TOS: ${res.statusText}`);
+    }
+
+    const result = await res.json();
+    return result?.data?.url;
+  } finally {
+    await fs.unlink(tempPath).catch(() => {});
+  }
 }
