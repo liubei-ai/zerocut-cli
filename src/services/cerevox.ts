@@ -152,7 +152,7 @@ export async function syncToTOS(url: string): Promise<string> {
   }
   if (!ext) ext = "bin";
 
-  const tempPath = join(tmpdir(), `upload-${Date.now()}.bin`);
+  const tempPath = join(tmpdir(), `upload-${Date.now()}.${ext}`);
 
   try {
     await pipeline(fileRes.body as any, createWriteStream(tempPath));
@@ -181,4 +181,116 @@ export async function syncToTOS(url: string): Promise<string> {
   } finally {
     await fs.unlink(tempPath).catch(() => {});
   }
+}
+
+export async function runFFMpegCommand(
+  session: Session,
+  command: string,
+  resources: string[] = []
+) {
+  // 验证命令只能是 ffmpeg 或 ffprobe
+  const trimmedCommand = command.trim();
+  if (!trimmedCommand.startsWith("ffmpeg") && !trimmedCommand.startsWith("ffprobe")) {
+    throw new Error("Only ffmpeg and ffprobe commands are allowed");
+  }
+  const terminal = session.terminal;
+  // 自动添加 -y 参数以避免交互式确认导致命令卡住
+  let finalCommand = trimmedCommand;
+  if (trimmedCommand.startsWith("ffmpeg") && !trimmedCommand.includes(" -y")) {
+    // 在 ffmpeg 后面插入 -y 参数
+    finalCommand = trimmedCommand.replace(/^ffmpeg/, "ffmpeg -y");
+  }
+
+  // 将 resources 中的文件同步到沙箱 materials 目录
+  await Promise.all(
+    resources.map((resource) => {
+      return getMaterialUri(session, resource);
+    })
+  );
+
+  // 构建工作目录路径 - materials 目录
+  const workDir = `/home/user/cerevox-zerocut/projects/${terminal.id}/materials`;
+  // 执行命令，用一个独立的命令行以免影响当前会话的cwd
+  const response = await terminal.create().run(finalCommand, {
+    cwd: workDir,
+  });
+
+  const outputFilePath = trimmedCommand.startsWith("ffmpeg")
+    ? finalCommand.split(" ").pop() || ""
+    : "";
+  const sandboxFilePath = join(workDir, outputFilePath);
+
+  // 等待命令完成
+  const result = await response.json();
+  if (result.exitCode === 0 && outputFilePath) {
+    const savePath = join(process.cwd(), basename(outputFilePath));
+
+    console.log(sandboxFilePath, savePath);
+
+    const files = session.files;
+    await files.download(sandboxFilePath, savePath);
+  }
+
+  return {
+    exitCode: result.exitCode,
+    outputFilePath,
+    data: {
+      stdout: result.stdout || (!result.exitCode && result.stderr) || "",
+      stderr: result.exitCode ? result.stderr : undefined,
+    },
+  };
+}
+
+function getPandocOutputFilePath(command: string): string {
+  const inlineMatch = command.match(/(?:^|\s)--output=("[^"]+"|'[^']+'|[^\s]+)/);
+  if (inlineMatch?.[1]) {
+    return inlineMatch[1].replace(/^["']|["']$/g, "");
+  }
+  const outputMatch = command.match(/(?:^|\s)(?:-o|--output)\s+("[^"]+"|'[^']+'|[^\s]+)/);
+  if (outputMatch?.[1]) {
+    return outputMatch[1].replace(/^["']|["']$/g, "");
+  }
+  return "";
+}
+
+export async function runPandocCommand(
+  session: Session,
+  command: string,
+  resources: string[] = []
+) {
+  const trimmedCommand = command.trim();
+  if (!trimmedCommand.startsWith("pandoc")) {
+    throw new Error("Only pandoc command is allowed");
+  }
+  const terminal = session.terminal;
+
+  await Promise.all(
+    resources.map((resource) => {
+      return getMaterialUri(session, resource);
+    })
+  );
+
+  const workDir = `/home/user/cerevox-zerocut/projects/${terminal.id}/materials`;
+  const response = await terminal.create().run(trimmedCommand, {
+    cwd: workDir,
+  });
+
+  const outputFilePath = getPandocOutputFilePath(trimmedCommand);
+  const sandboxFilePath = outputFilePath ? join(workDir, outputFilePath) : "";
+
+  const result = await response.json();
+  if (result.exitCode === 0 && outputFilePath) {
+    const savePath = join(process.cwd(), basename(outputFilePath));
+    const files = session.files;
+    await files.download(sandboxFilePath, savePath);
+  }
+
+  return {
+    exitCode: result.exitCode,
+    outputFilePath,
+    data: {
+      stdout: result.stdout || (!result.exitCode && result.stderr) || "",
+      stderr: result.exitCode ? result.stderr : undefined,
+    },
+  };
 }

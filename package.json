@@ -9,7 +9,7 @@
     "zerocut-cli": "dist/bin/zerocut.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node scripts/copy-skill-md.cjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",

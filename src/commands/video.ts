@@ -32,7 +32,8 @@ export function register(program: Command): void {
     opts: {
       prompt?: string;
       duration?: string;
-      video?: string;
+      model?: string;
+      sourceVideo?: string;
       seed?: string;
       firstFrame?: string;
       lastFrame?: string;
@@ -55,16 +56,17 @@ export function register(program: Command): void {
       process.exitCode = 1;
       return;
     }
-    let model = typeof opts.video === "string" ? opts.video.trim() : undefined;
+    let model = typeof opts.model === "string" ? opts.model.trim() : undefined;
     if (model && !(allowedTypes as readonly string[]).includes(model)) {
       process.stderr.write(
-        `Invalid value for --video: ${model}. Allowed: ${allowedTypes.join("|")}\n`
+        `Invalid value for --model: ${model}. Allowed: ${allowedTypes.join("|")}\n`
       );
       process.exitCode = 1;
       return;
     }
     if (!model) model = "vidu";
     const durationStr = typeof opts.duration === "string" ? opts.duration.trim() : undefined;
+    const sourceVideo = typeof opts.sourceVideo === "string" ? opts.sourceVideo.trim() : undefined;
     let duration: number = 0;
     if (durationStr) {
       const n = Number.parseInt(durationStr, 10);
@@ -125,6 +127,14 @@ export function register(program: Command): void {
       optimize_camera: opts.optimizeCameraMotion,
       seed: opts.seed ? Number.parseInt(opts.seed, 10) : undefined,
       images: images.length > 0 ? images : undefined,
+      videos: sourceVideo
+        ? [
+            {
+              type: "base",
+              url: await getMaterialUri(session, sourceVideo),
+            },
+          ]
+        : undefined,
       onProgress: createProgressSpinner("inferencing"),
     });
     try {
@@ -155,8 +165,9 @@ export function register(program: Command): void {
   // default action on `zerocut video`
   parent
     .option("--prompt <prompt>", "Text prompt for video generation (required)")
-    .option("--duration <duration>", "Video duration in seconds")
-    .option("--video <video>", `Video model: ${allowedTypes.join("|")} (default: vidu)`)
+    .option("--duration <duration>", "Video duration in seconds (1-16)")
+    .option("--model <model>", `Video model: ${allowedTypes.join("|")} (default: vidu)`)
+    .option("--sourceVideo <video>", "Base video path/url for edit mode (requires --duration 3-10)")
     .option("--seed <seed>", "Random seed")
     .option("--firstFrame <image>", "First frame image path/url")
     .option("--lastFrame <image>", "Last frame image path/url")
@@ -173,8 +184,9 @@ export function register(program: Command): void {
     .command("create")
     .description("Create a new video; requires --prompt")
     .option("--prompt <prompt>", "Text prompt for video generation (required)")
-    .option("--duration <duration>", "Video duration in seconds")
-    .option("--video <video>", `Video model: ${allowedTypes.join("|")} (default: vidu)`)
+    .option("--duration <duration>", "Video duration in seconds (1-16)")
+    .option("--model <model>", `Video model: ${allowedTypes.join("|")} (default: vidu)`)
+    .option("--sourceVideo <video>", "Base video path/url for edit mode (requires --duration 3-10)")
     .option("--seed <seed>", "Random seed")
     .option("--firstFrame <image>", "First frame image path/url")
     .option("--lastFrame <image>", "Last frame image path/url")

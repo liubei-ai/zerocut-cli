@@ -2,18 +2,18 @@
 
 # ZeroCut CLI
 
-ZeroCut CLI is a modular, extensible command-line toolkit that lets an AI assistant create and edit media across images, audio, and video. It is built with Node.js (TypeScript), uses CommonJS output, and follows a one-command-per-file architecture.
+ZeroCut CLI is a modular, extensible command-line toolkit for media generation and sandbox tool execution. It is built with Node.js (TypeScript), uses CommonJS output, and follows a one-command-per-file architecture.
 
 ## Features
 
-- Media creation and editing for images, audio, and video
+- Media generation for image/video/music/tts
+- Sandbox tool execution for ffmpeg and pandoc
 - Modular commands (one file per command under `src/commands/*`)
 - Dynamic external command loading via `ZEROCUT_COMMANDS_DIR` (.js/.cjs files)
 - Configuration interceptor that validates required keys (`apiKey`)
 - Session lifecycle management using Cerevox (open on preAction, close on postAction)
+- Built-in `skill` command to print tool usage spec
 - Strict TypeScript, ESLint + Prettier, pnpm-based project
-
-Note: Image commands are implemented. Video commands are available with placeholder implementations and validated parameters. Audio commands are planned.
 
 ## Requirements
 
@@ -30,6 +30,9 @@ pnpm add -g zerocut-cli
 
 # Run directly without installing
 pnpm dlx zerocut-cli help
+
+# Run directly with npx
+npx zerocut-cli help
 ```
 
 ### Local Development
@@ -51,15 +54,15 @@ zerocut help
 - Show help:
 
 ```bash
-zerocut help
+npx zerocut-cli help
 ```
 
 - Configure required settings:
 
 ```bash
-zerocut config key <key>            # Or use OTT exchange below
+npx zerocut-cli config key <key>            # Or use OTT exchange below
 # quick OTT exchange:
-zerocut config --ott <token> --region <cn|us>
+npx zerocut-cli config --ott <token> --region <cn|us>
 ```
 
 If configuration is missing, Zerocut prints:
@@ -81,7 +84,9 @@ or:
 - Key-path API (internal): `getConfigValueSync('a.b')`, `setConfigValueSync('a.b.c','value')`
 
 ### Interactive configuration
+
 Key setup supports direct input or OTT exchange:
+
 ```bash
 zerocut config key                   # prompts: choose region (cn/us), then enter OTT
 zerocut config --ott <token> --region <cn|us>   # non-interactive
@@ -90,6 +95,7 @@ zerocut config --ott <token> --region <cn|us>   # non-interactive
 ## Commands
 
 - `help` — show available commands
+- `skill` — print built-in `SKILL.md` content
 - `config` — configuration management
   - `key [key]` — set API key (prompts if omitted; supports OTT exchange)
 - `image` — create a new image (default action; requires `--prompt`)
@@ -100,34 +106,81 @@ zerocut config --ott <token> --region <cn|us>   # non-interactive
     - `--resolution <resolution>` (1K|2K|4K)
     - `--refs <img1,img2,...>` (comma-separated paths/URLs)
     - `--output <file>` (output file path)
-  - Notes:
-    - During image generation, CLI displays a lightweight spinner-based progress indicator to show that inference is running.
-- `audio` — audio commands (parent) — planned
-  - `create` — synthesize or compose audio from text or references — planned
-  - `edit` — trim, mix, or apply effects to existing audio — planned
 - `video` — create a new video (default action; requires `--prompt`)
-    - Options:
-      - `--prompt <prompt>` (required)
-      - `--duration <seconds>` (integer 1–16)
-      - `--video <model>` (enum: `zerocut3.0|seedance-1.5-pro|vidu|vidu-pro|viduq3|viduq3-turbo|kling|kling-v3|wan|wan-flash|sora2|sora2-pro|veo3.1|veo3.1-pro`; default `vidu`)
-      - `--seed <seed>`
-      - `--firstFrame <image>`
-      - `--lastFrame <image>`
-      - `--refs <assets>`
-      - `--resolution <resolution>`
-      - `--aspectRatio <ratio>` (9:16|16:9|1:1)
-      - `--withAudio`
-      - `--optimizeCameraMotion`
-      - `--output <file>`
+  - Options:
+    - `--prompt <prompt>` (required)
+    - `--duration <seconds>` (integer 1–16; when `--sourceVideo` is set, must be 3–10)
+    - `--model <model>` (enum: `zerocut3.0|seedance-1.5-pro|vidu|vidu-pro|viduq3|viduq3-turbo|kling|kling-v3|wan|wan-flash|sora2|sora2-pro|veo3.1|veo3.1-pro`; default `vidu`)
+    - `--sourceVideo <video>` (base video path/url for edit mode)
+    - `--seed <seed>`
+    - `--firstFrame <image>`
+    - `--lastFrame <image>`
+    - `--refs <assets>`
+    - `--resolution <resolution>`
+    - `--aspectRatio <ratio>` (9:16|16:9|1:1)
+    - `--withAudio`
+    - `--optimizeCameraMotion`
+    - `--output <file>`
+  - Notes:
+    - long videos over 16 seconds should be split into multiple clips (each 1–16s)
+    - merge split clips using `ffmpeg` command
+- `music` — create music (default action; requires `--prompt`)
+  - Options:
+    - `--prompt <prompt>` (required)
+    - `--output <file>`
+- `tts` — text to speech (default action; requires `--text`)
+  - Options:
+    - `--prompt <prompt>`
+    - `--text <text>` (required)
+    - `--voiceId <voiceId>`
+    - `--output <file>`
+- `ffmpeg` — run ffmpeg in sandbox
+  - Options:
+    - `--args <args...>` (required)
+    - `--resources <resources...>` (optional)
+  - Notes:
+    - only `ffmpeg`/`ffprobe` commands are allowed
+    - `ffmpeg` auto-injects `-y` when missing
+    - output file is auto-downloaded to current directory
+- `pandoc` — run pandoc in sandbox
+  - Options:
+    - `--args <args...>` (required)
+    - `--resources <resources...>` (optional)
+  - Notes:
+    - only `pandoc` command is allowed
+    - output file must be specified with `-o` / `--output` / `--output=...`
+    - output file is auto-downloaded to current directory
 
 ### Examples
 
 ```bash
 # Create an image (default action)
-zerocut image --prompt "a cat" --model seedream --aspectRatio 1:1 --resolution 1K --refs ref1.png,ref2.jpg --output out.png
+npx zerocut-cli image --prompt "a cat" --model seedream --aspectRatio 1:1 --resolution 1K --refs ref1.png,ref2.jpg --output out.png
 
 # Create video (default action)
-zerocut video --prompt "city night drive" --duration 12 --video vidu --refs frame1.png,frame2.png --resolution 720p --output movie.mp4
+npx zerocut-cli video --prompt "city night drive" --duration 12 --model vidu --refs frame1.png,frame2.png --resolution 720p --output movie.mp4
+
+# Edit from source video (duration must be 3-10 when sourceVideo is set)
+npx zerocut-cli video --prompt "remix this clip" --model vidu --sourceVideo input.mp4 --duration 6 --output edited.mp4
+
+# Split long video需求并拼接
+printf "file 'part1.mp4'\nfile 'part2.mp4'\nfile 'part3.mp4'\n" > concat.txt
+npx zerocut-cli ffmpeg --args -f concat -safe 0 -i concat.txt -c copy final.mp4 --resources concat.txt part1.mp4 part2.mp4 part3.mp4
+
+# Create speech audio (default action)
+npx zerocut-cli tts --text "你好，欢迎使用 ZeroCut" --voiceId voice_xxx --output speech.mp3
+
+# Create music (default action)
+npx zerocut-cli music --prompt "lofi beat" --output music.mp3
+
+# Run ffmpeg in sandbox
+npx zerocut-cli ffmpeg --args -i input.mp4 -vn output.mp3 --resources input.mp4
+
+# Run pandoc in sandbox
+npx zerocut-cli pandoc --args input.md -o output.pdf --resources input.md
+
+# Print built-in skill spec
+npx zerocut-cli skill
 ```
 
 ## Dynamic External Commands

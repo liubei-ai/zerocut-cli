@@ -4,6 +4,10 @@ import { register as registerImage } from "../commands/image";
 import { register as registerConfig } from "../commands/config";
 import { register as registerVideo } from "../commands/video";
 import { register as registerMusic } from "../commands/music";
+import { register as registerTts } from "../commands/tts";
+import { register as registerFfmpeg } from "../commands/ffmpeg";
+import { register as registerPandoc } from "../commands/pandoc";
+import { register as registerSkill } from "../commands/skill";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -13,6 +17,10 @@ export function loadBuiltInCommands(program: Command): void {
   registerImage(program);
   registerVideo(program);
   registerMusic(program);
+  registerTts(program);
+  registerFfmpeg(program);
+  registerPandoc(program);
+  registerSkill(program);
 }
 
 export async function loadExternalCommandsAsync(program: Command, dir?: string): Promise<void> {

@@ -1,19 +1,20 @@
 import type { Command } from "commander";
 import { getSessionFromCommand, syncToTOS } from "../services/cerevox";
-import { createProgressSpinner } from "../utils/progress";
 import fs from "node:fs";
 import path from "node:path";
 
-export const name = "music";
-export const description = "Music command: create music";
+export const name = "tts";
+export const description = "TTS command: create speech audio";
 
 export function register(program: Command): void {
-  const parent = program.command("music").description("Create a new music; requires --prompt");
+  const parent = program.command("tts").description("Create speech audio; requires --text");
 
-  async function musicCreateAction(
+  async function ttsCreateAction(
     this: Command,
     opts: {
       prompt?: string;
+      text?: string;
+      voiceId?: string;
       output?: string;
     }
   ) {
@@ -22,17 +23,19 @@ export function register(program: Command): void {
       process.stderr.write("No active session\n");
       return;
     }
-    const prompt = typeof opts.prompt === "string" ? opts.prompt : undefined;
-    if (!prompt || prompt.trim().length === 0) {
-      process.stderr.write("Missing required option: --prompt\n");
+    const text = typeof opts.text === "string" ? opts.text : undefined;
+    if (!text || text.trim().length === 0) {
+      process.stderr.write("Missing required option: --text\n");
       process.exitCode = 1;
       return;
     }
-    const res = await session.ai.generateMusic({
+    const prompt = typeof opts.prompt === "string" ? opts.prompt : undefined;
+    const voiceId = typeof opts.voiceId === "string" ? opts.voiceId : undefined;
+    const res = await session.ai.textToSpeech({
       prompt,
-      onProgress: createProgressSpinner("inferencing"),
+      text,
+      voiceId,
     });
-    process.stdout.write("\n");
     try {
       if (res?.url) {
         const tosUrl = await syncToTOS(res.url as string);
@@ -56,23 +59,22 @@ export function register(program: Command): void {
       fs.writeFileSync(filePath, buffer);
       res.output = filePath;
     }
-    console.log({
-      url: res.url,
-      duration: res.duration,
-      usage: res.usage,
-      output: res.output,
-    });
+    console.log(res);
   }
 
   parent
-    .option("--prompt <prompt>", "Text prompt for music generation (required)")
+    .option("--prompt <prompt>", "Prompt for speech style/context")
+    .option("--text <text>", "Text to synthesize (required)")
+    .option("--voiceId <voiceId>", "Voice ID")
     .option("--output <file>", "Output file path")
-    .action(musicCreateAction);
+    .action(ttsCreateAction);
 
   parent
     .command("create")
-    .description("Create a new music; requires --prompt")
-    .option("--prompt <prompt>", "Text prompt for music generation (required)")
+    .description("Create speech audio; requires --text")
+    .option("--prompt <prompt>", "Prompt for speech style/context")
+    .option("--text <text>", "Text to synthesize (required)")
+    .option("--voiceId <voiceId>", "Voice ID")
     .option("--output <file>", "Output file path")
-    .action(musicCreateAction);
+    .action(ttsCreateAction);
 }
