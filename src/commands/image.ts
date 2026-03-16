@@ -11,7 +11,15 @@ export const description = "Image command: create image";
 export function register(program: Command): void {
   const parent = program.command("image").description("Create a new image; requires --prompt");
 
-  const allowedModels = ["seedream", "seedream-pro", "banana", "banana-pro", "wan"] as const;
+  const allowedModels = [
+    "seedream",
+    "seedream-pro",
+    "seedream-5l",
+    "banana",
+    "banana2",
+    "banana-pro",
+    "wan",
+  ] as const;
   type AllowedModel = (typeof allowedModels)[number];
   const allowedAspectRatios = [
     "1:1",

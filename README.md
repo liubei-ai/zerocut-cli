@@ -95,7 +95,7 @@ zerocut config --ott <token> --region <cn|us>   # non-interactive
 - `image` — create a new image (default action; requires `--prompt`)
   - Options:
     - `--prompt <prompt>` (required)
-    - `--model <model>` (seedream|seedream-pro|banana|banana-pro|wan)
+    - `--model <model>` (seedream|seedream-pro|seedream-5l|banana|banana2|banana-pro|wan)
     - `--aspectRatio <ratio>` (1:1|3:4|4:3|16:9|9:16|2:3|3:2|21:9|1:4|4:1|1:8|8:1)
     - `--resolution <resolution>` (1K|2K|4K)
     - `--refs <img1,img2,...>` (comma-separated paths/URLs)
@@ -105,8 +105,7 @@ zerocut config --ott <token> --region <cn|us>   # non-interactive
 - `audio` — audio commands (parent) — planned
   - `create` — synthesize or compose audio from text or references — planned
   - `edit` — trim, mix, or apply effects to existing audio — planned
-- `video` — video commands (parent)
-  - `create` — generate video from prompt and references (placeholder implementation)
+- `video` — create a new video (default action; requires `--prompt`)
     - Options:
       - `--prompt <prompt>` (required)
       - `--duration <seconds>` (integer 1–16)
@@ -120,15 +119,6 @@ zerocut config --ott <token> --region <cn|us>   # non-interactive
       - `--withAudio`
       - `--optimizeCameraMotion`
       - `--output <file>`
-  - `edit` — apply modifications to an existing video (placeholder implementation)
-    - Options:
-      - `--source <source>` (required)
-      - `--prompt <prompt>` (required)
-      - `--type <type>` (enum: `edit|lipsync|extend|upscale`)
-      - `--duration <seconds>` (integer 1–16)
-      - `--resolution <resolution>` (enum: `720p|1080p|2K|4K`)
-      - `--refs <assets>`
-      - `--output <file>`
 
 ### Examples
 
@@ -136,11 +126,8 @@ zerocut config --ott <token> --region <cn|us>   # non-interactive
 # Create an image (default action)
 zerocut image --prompt "a cat" --model seedream --aspectRatio 1:1 --resolution 1K --refs ref1.png,ref2.jpg --output out.png
 
-# Create video
-zerocut video create --prompt "city night drive" --duration 12 --type vidu --refs frame1.png,frame2.png --resolution 720p --output movie.mp4
-
-# Edit video
-zerocut video edit --source movie.mp4 --prompt "brighten" --type edit --duration 8 --resolution 1080p --refs mask.png --output final.mp4
+# Create video (default action)
+zerocut video --prompt "city night drive" --duration 12 --type vidu --refs frame1.png,frame2.png --resolution 720p --output movie.mp4
 ```
 
 ## Dynamic External Commands
