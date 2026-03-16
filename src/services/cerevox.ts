@@ -75,7 +75,7 @@ export async function getMaterialUri(
   const resolvedOptions: Required<GetMaterialUriOptions> = {
     fileSizeLimit: options.fileSizeLimit ?? -1,
   };
-  const localPath = resolve("materials", fileName);
+  const localPath = resolve(fileName);
   const hash = await computeSha256(localPath);
   const url = session.sandbox.getUrl(
     `/zerocut/${session.terminal.id}/materials/${basename(fileName)}`

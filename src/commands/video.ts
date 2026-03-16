@@ -120,7 +120,7 @@ export function register(program: Command): void {
           const url = res.url;
           const response = await fetch(url);
           const buffer = Buffer.from(await response.arrayBuffer());
-          const filePath = path.resolve(dir, "materials", output);
+          const filePath = path.resolve(dir, output);
           if (!fs.existsSync(path.dirname(filePath))) {
             fs.mkdirSync(path.dirname(filePath), { recursive: true });
           }
@@ -171,7 +171,7 @@ export function register(program: Command): void {
           const url = res.url;
           const response = await fetch(url);
           const buffer = Buffer.from(await response.arrayBuffer());
-          const filePath = path.resolve(dir, "materials", output);
+          const filePath = path.resolve(dir, output);
           if (!fs.existsSync(path.dirname(filePath))) {
             fs.mkdirSync(path.dirname(filePath), { recursive: true });
           }
@@ -318,7 +318,7 @@ export function register(program: Command): void {
         const url = res.url;
         const response = await fetch(url);
         const buffer = Buffer.from(await response.arrayBuffer());
-        const filePath = path.resolve(dir, "materials", output);
+        const filePath = path.resolve(dir, output);
         if (!fs.existsSync(path.dirname(filePath))) {
           fs.mkdirSync(path.dirname(filePath), { recursive: true });
         }
