@@ -73,6 +73,7 @@ Validation rules:
 - `--prompt` must be non-empty
 - `--model` allowed: `seedream|seedream-pro|seedream-5l|banana|banana2|banana-pro|wan`
 - `--aspectRatio` allowed: `1:1|3:4|4:3|16:9|9:16|2:3|3:2|21:9|1:4|4:1|1:8|8:1`
+- unless user specifies aspect ratio, default to `16:9`
 - `--resolution` allowed: `1K|2K|4K`
 - unless user specifies resolution, default to `1K`
 
@@ -108,6 +109,7 @@ Validation rules:
 - `--model` allowed: `zerocut3.0|seedance-1.5-pro|vidu|vidu-pro|viduq3|viduq3-turbo|kling|kling-v3|wan|wan-flash|sora2|sora2-pro|veo3.1|veo3.1-pro`
 - `--duration` must be integer in `1-16`
 - `--aspectRatio` allowed: `9:16|16:9|1:1`
+- unless user specifies aspect ratio, default to `16:9`
 - unless user specifies resolution, default to `720p`
 
 Long video guidance:
