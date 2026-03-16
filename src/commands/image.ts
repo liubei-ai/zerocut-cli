@@ -7,10 +7,10 @@ import type { Session } from "cerevox";
 import { createProgressSpinner } from "../utils/progress";
 
 export const name = "image";
-export const description = "Image commands: create and edit";
+export const description = "Image command: create image";
 
 export function register(program: Command): void {
-  const parent = program.command("image").description("Image commands: create and edit");
+  const parent = program.command("image").description("Create a new image; requires --prompt");
 
   const allowedTypes = ["seedream", "seedream-pro", "banana", "banana-pro", "wan"] as const;
   type AllowedType = (typeof allowedTypes)[number];
@@ -58,6 +58,52 @@ export function register(program: Command): void {
     console.log(res);
   }
 
+  async function imageCreateAction(
+    this: Command,
+    opts: { prompt?: string; type?: string; size?: string; refs?: string; output?: string }
+  ) {
+    const session = getSessionFromCommand(this as unknown as Record<symbol, unknown>);
+    if (!session) {
+      process.stderr.write("No active session\n");
+      return;
+    }
+    const prompt = typeof opts.prompt === "string" ? opts.prompt : undefined;
+    if (!prompt || prompt.trim().length === 0) {
+      process.stderr.write("Missing required option: --prompt\n");
+      process.exitCode = 1;
+      return;
+    }
+    const type = typeof opts.type === "string" ? opts.type.trim() : undefined;
+    if (type && !(allowedTypes as readonly string[]).includes(type)) {
+      process.stderr.write(
+        `Invalid value for --type: ${type}. Allowed: ${allowedTypes.join("|")}\n`
+      );
+      process.exitCode = 1;
+      return;
+    }
+    const typeArg: AllowedType | undefined = (type ?? undefined) as AllowedType | undefined;
+    const size = typeof opts.size === "string" ? opts.size : undefined;
+    const refsList =
+      typeof opts.refs === "string" && opts.refs.length > 0
+        ? opts.refs
+            .split(",")
+            .map((s) => s.trim())
+            .filter((s) => s.length > 0)
+        : [];
+    const output = typeof opts.output === "string" ? opts.output : undefined;
+    await performImageGeneration(session, { prompt, type: typeArg, size, refsList, output });
+  }
+
+  // default action on `zerocut image`
+  parent
+    .option("--prompt <prompt>", "Text prompt for image generation (required)")
+    .option("--type <type>", `Generator type: ${allowedTypes.join("|")}`)
+    .option("--size <size>", "Image size, e.g., 512x512")
+    .option("--refs <refs>", "Comma-separated reference image paths/urls")
+    .option("--output <file>", "Output file path")
+    .action(imageCreateAction);
+
+  // keep `image create` for compatibility
   parent
     .command("create")
     .description("Create a new image; requires --prompt")
@@ -66,98 +112,7 @@ export function register(program: Command): void {
     .option("--size <size>", "Image size, e.g., 512x512")
     .option("--refs <refs>", "Comma-separated reference image paths/urls")
     .option("--output <file>", "Output file path")
-    .action(async function (
-      this: Command,
-      opts: { prompt?: string; type?: string; size?: string; refs?: string; output?: string }
-    ) {
-      const session = getSessionFromCommand(this as unknown as Record<symbol, unknown>);
-      if (!session) {
-        process.stderr.write("No active session\n");
-        return;
-      }
-      const prompt = typeof opts.prompt === "string" ? opts.prompt : undefined;
-      if (!prompt || prompt.trim().length === 0) {
-        process.stderr.write("Missing required option: --prompt\n");
-        process.exitCode = 1;
-        return;
-      }
-      const type = typeof opts.type === "string" ? opts.type.trim() : undefined;
-      if (type && !(allowedTypes as readonly string[]).includes(type)) {
-        process.stderr.write(
-          `Invalid value for --type: ${type}. Allowed: ${allowedTypes.join("|")}\n`
-        );
-        process.exitCode = 1;
-        return;
-      }
-      const typeArg: AllowedType | undefined = (type ?? undefined) as AllowedType | undefined;
-      const size = typeof opts.size === "string" ? opts.size : undefined;
-      const refsList =
-        typeof opts.refs === "string" && opts.refs.length > 0
-          ? opts.refs
-              .split(",")
-              .map((s) => s.trim())
-              .filter((s) => s.length > 0)
-          : [];
-      const output = typeof opts.output === "string" ? opts.output : undefined;
-      await performImageGeneration(session, { prompt, type: typeArg, size, refsList, output });
-    });
+    .action(imageCreateAction);
 
-  parent
-    .command("edit")
-    .description("Edit an existing image by applying modifications")
-    .option("--source <source>", "Original image path/url (required)")
-    .option("--prompt <prompt>", "Text prompt for image generation (required)")
-    .option("--type <type>", `Generator type: ${allowedTypes.join("|")}`)
-    .option("--size <size>", "Image size, e.g., 512x512")
-    .option("--refs <refs>", "Comma-separated reference image paths/urls")
-    .option("--output <file>", "Output file path")
-    .action(async function (
-      this: Command,
-      opts: {
-        source?: string;
-        prompt?: string;
-        type?: string;
-        size?: string;
-        refs?: string;
-        output?: string;
-      }
-    ) {
-      const session = getSessionFromCommand(this as unknown as Record<symbol, unknown>);
-      if (!session) {
-        process.stderr.write("No active session\n");
-        return;
-      }
-      const source = typeof opts.source === "string" ? opts.source.trim() : undefined;
-      if (!source || source.length === 0) {
-        process.stderr.write("Missing required option: --source\n");
-        process.exitCode = 1;
-        return;
-      }
-      const prompt = typeof opts.prompt === "string" ? opts.prompt : undefined;
-      if (!prompt || prompt.trim().length === 0) {
-        process.stderr.write("Missing required option: --prompt\n");
-        process.exitCode = 1;
-        return;
-      }
-      const type = typeof opts.type === "string" ? opts.type.trim() : undefined;
-      if (type && !(allowedTypes as readonly string[]).includes(type)) {
-        process.stderr.write(
-          `Invalid value for --type: ${type}. Allowed: ${allowedTypes.join("|")}\n`
-        );
-        process.exitCode = 1;
-        return;
-      }
-      const typeArg: AllowedType | undefined = (type ?? undefined) as AllowedType | undefined;
-      const size = typeof opts.size === "string" ? opts.size : undefined;
-      const refsList =
-        typeof opts.refs === "string" && opts.refs.length > 0
-          ? opts.refs
-              .split(",")
-              .map((s) => s.trim())
-              .filter((s) => s.length > 0)
-          : [];
-      refsList.unshift(source);
-      const output = typeof opts.output === "string" ? opts.output : undefined;
-      await performImageGeneration(session, { prompt, type: typeArg, size, refsList, output });
-    });
+  // removed `image edit`
 }

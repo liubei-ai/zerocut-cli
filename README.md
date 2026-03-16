@@ -99,22 +99,13 @@ zerocut config list                   # print masked configuration
   - `projectDir [dir]` — set project directory (prompts if omitted; creates directory if missing)
   - `region [region]` — set region (`us|cn`; default `us`)
   - `list` — print masked configuration
-- `image` — image commands (parent)
-  - `create` — create a new image; requires `--prompt`
-    - Options:
-      - `--prompt <prompt>` (required)
-      - `--type <type>` (seedream|seedream-pro|banana|banana-pro|wan)
-      - `--size <size>` (e.g., 512x512)
-      - `--refs <img1,img2,...>` (comma-separated paths/URLs)
-      - `--output <file>` (output file path)
-  - `edit` — edit an existing image by applying modifications
-    - Options:
-      - `--source <source>` (required; inserted to refs list head)
-      - `--prompt <prompt>` (required)
-      - `--type <type>` (same enum as create)
-      - `--size <size>`
-      - `--refs <img1,img2,...>`
-      - `--output <file>`
+- `image` — create a new image (default action; requires `--prompt`)
+  - Options:
+    - `--prompt <prompt>` (required)
+    - `--type <type>` (seedream|seedream-pro|banana|banana-pro|wan)
+    - `--size <size>` (e.g., 512x512)
+    - `--refs <img1,img2,...>` (comma-separated paths/URLs)
+    - `--output <file>` (output file path)
   - Notes:
     - During image generation, CLI displays a lightweight spinner-based progress indicator to show that inference is running.
 - `audio` — audio commands (parent) — planned
@@ -148,11 +139,8 @@ zerocut config list                   # print masked configuration
 ### Examples
 
 ```bash
-# Create an image
-zerocut image create --prompt "a cat" --type seedream --size 512x512 --refs ref1.png,ref2.jpg --output out.png
-
-# Edit an image
-zerocut image edit --source base.png --prompt "make it vintage" --type banana-pro --refs mask.png --output edited.png
+# Create an image (default action)
+zerocut image --prompt "a cat" --type seedream --size 512x512 --refs ref1.png,ref2.jpg --output out.png
 
 # Create video
 zerocut video create --prompt "city night drive" --duration 12 --type vidu --refs frame1.png,frame2.png --resolution 720p --output movie.mp4
