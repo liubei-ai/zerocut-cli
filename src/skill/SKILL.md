@@ -34,7 +34,9 @@ Before every task, the agent must check configuration first:
 npx zerocut-cli config list
 ```
 
-If `apiKey` is missing or empty, require user to configure via OTT exchange first:
+If `apiKey` is missing or empty, the agent must immediately stop task execution and request an OTT token from the user. Do not continue any generation, conversion, or sandbox command until configuration is completed.
+
+Required user action:
 
 ```bash
 npx zerocut-cli config --ott <token> --region <cn|us>
