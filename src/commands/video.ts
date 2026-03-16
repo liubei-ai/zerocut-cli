@@ -153,7 +153,7 @@ export function register(program: Command): void {
             | "pro"
             | "veo3.1"
             | "veo3.1-pro"
-            | "kling-o1",
+            | "kling",
           prompt,
           duration,
           resolution: opts.resolution,
@@ -293,7 +293,6 @@ export function register(program: Command): void {
           videoUrl,
           audioUrl,
           audioInMs: 0,
-          pad_audio: false,
           onProgress: createProgressSpinner("inferencing"),
         });
       } else if (type === "extend") {

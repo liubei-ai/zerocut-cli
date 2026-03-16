@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { getConfigValueSync, setConfigValueSync } from "./config";
 import { createReadStream } from "node:fs";
 import { resolve, basename } from "node:path";
+import { stat } from "node:fs/promises";
 
 export const SESSION_SYMBOL = Symbol("zerocut.session");
 
@@ -62,13 +63,19 @@ async function computeSha256(filePath: string): Promise<string> {
   });
 }
 
-export async function getMaterialUri(session: Session, fileNameOrUrl: string) {
-  if (fileNameOrUrl.startsWith("http://") || fileNameOrUrl.startsWith("https://")) {
-    return fileNameOrUrl;
-  }
-  const fileName = fileNameOrUrl;
-  const cwd = process.cwd();
-  const localPath = resolve(cwd, "materials", fileName);
+interface GetMaterialUriOptions {
+  fileSizeLimit?: number;
+}
+
+export async function getMaterialUri(
+  session: Session,
+  fileName: string,
+  options: GetMaterialUriOptions = {}
+): Promise<string> {
+  const resolvedOptions: Required<GetMaterialUriOptions> = {
+    fileSizeLimit: options.fileSizeLimit ?? -1,
+  };
+  const localPath = resolve("materials", fileName);
   const hash = await computeSha256(localPath);
   const url = session.sandbox.getUrl(
     `/zerocut/${session.terminal.id}/materials/${basename(fileName)}`
@@ -78,13 +85,20 @@ export async function getMaterialUri(session: Session, fileNameOrUrl: string) {
     method: "HEAD",
   });
   if (res.status === 404 || hash !== res.headers.get("X-Content-Hash")) {
+    if (resolvedOptions.fileSizeLimit > 0) {
+      const stats = await stat(localPath);
+      const fileSizeMb = stats.size / (1024 * 1024);
+      if (fileSizeMb > resolvedOptions.fileSizeLimit) {
+        throw new Error(
+          `文件太大：${fileName} (${fileSizeMb.toFixed(2)}MB)，限制为 ${resolvedOptions.fileSizeLimit}MB`
+        );
+      }
+    }
     const saveToPath = `/home/user/cerevox-zerocut/projects/${session.terminal.id}/materials/${fileName}`;
     const files = session.files;
     await files.upload(localPath, saveToPath);
   } else if (res.status > 299) {
-    throw new Error(
-      `Failed to get material url: ${url}，请先上传素材(upload-custom-materials)到沙箱`
-    );
+    throw new Error(`Failed to get material from ${url}. Details: ${res.statusText}`);
   }
   return url;
 }

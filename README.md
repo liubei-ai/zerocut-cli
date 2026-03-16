@@ -81,12 +81,8 @@ or:
 - Key-path API (internal): `getConfigValueSync('a.b')`, `setConfigValueSync('a.b.c','value')`
 
 ### Interactive configuration
-
-Both config subcommands accept optional arguments and will prompt if omitted:
 Key setup supports direct input or OTT exchange:
-
 ```bash
-zerocut config apiKey                 # prompts: Enter API key (get one at workspace.zerocut.cn)
 zerocut config key                   # prompts: choose region (cn/us), then enter OTT
 zerocut config --ott <token> --region <cn|us>   # non-interactive
 ```
@@ -94,15 +90,14 @@ zerocut config --ott <token> --region <cn|us>   # non-interactive
 ## Commands
 
 - `help` — show available commands
-- `config` — configuration management (parent)
-  - `apiKey [key]` — set API key (prompts if omitted)
+- `config` — configuration management
   - `key [key]` — set API key (prompts if omitted; supports OTT exchange)
-- `image` — create a new image (default action; requires `--prompt`)
 - `image` — create a new image (default action; requires `--prompt`)
   - Options:
     - `--prompt <prompt>` (required)
-    - `--type <type>` (seedream|seedream-pro|banana|banana-pro|wan)
-    - `--size <size>` (e.g., 512x512)
+    - `--model <model>` (seedream|seedream-pro|banana|banana-pro|wan)
+    - `--aspectRatio <ratio>` (1:1|3:4|4:3|16:9|9:16|2:3|3:2|21:9|1:4|4:1|1:8|8:1)
+    - `--resolution <resolution>` (1K|2K|4K)
     - `--refs <img1,img2,...>` (comma-separated paths/URLs)
     - `--output <file>` (output file path)
   - Notes:
@@ -139,7 +134,7 @@ zerocut config --ott <token> --region <cn|us>   # non-interactive
 
 ```bash
 # Create an image (default action)
-zerocut image --prompt "a cat" --type seedream --size 512x512 --refs ref1.png,ref2.jpg --output out.png
+zerocut image --prompt "a cat" --model seedream --aspectRatio 1:1 --resolution 1K --refs ref1.png,ref2.jpg --output out.png
 
 # Create video
 zerocut video create --prompt "city night drive" --duration 12 --type vidu --refs frame1.png,frame2.png --resolution 720p --output movie.mp4
