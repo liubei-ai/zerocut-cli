@@ -32,7 +32,7 @@ export function register(program: Command): void {
     opts: {
       prompt?: string;
       duration?: string;
-      type?: string;
+      video?: string;
       seed?: string;
       firstFrame?: string;
       lastFrame?: string;
@@ -55,15 +55,15 @@ export function register(program: Command): void {
       process.exitCode = 1;
       return;
     }
-    let type = typeof opts.type === "string" ? opts.type.trim() : undefined;
-    if (type && !(allowedTypes as readonly string[]).includes(type)) {
+    let model = typeof opts.video === "string" ? opts.video.trim() : undefined;
+    if (model && !(allowedTypes as readonly string[]).includes(model)) {
       process.stderr.write(
-        `Invalid value for --type: ${type}. Allowed: ${allowedTypes.join("|")}\n`
+        `Invalid value for --video: ${model}. Allowed: ${allowedTypes.join("|")}\n`
       );
       process.exitCode = 1;
       return;
     }
-    if (!type) type = "vidu";
+    if (!model) model = "vidu";
     const durationStr = typeof opts.duration === "string" ? opts.duration.trim() : undefined;
     let duration: number = 0;
     if (durationStr) {
@@ -75,108 +75,70 @@ export function register(program: Command): void {
       }
       duration = n;
     }
+    const images: {
+      type: "first_frame" | "last_frame" | "reference" | "storyboard";
+      url: string;
+      name?: string;
+    }[] = [];
     if (opts.firstFrame) {
-      let typeStr: string = type || "vidu";
-      if (typeStr === "wan") type = "wan-flash";
-      if (typeStr === "seedance") type = "pro";
-      if (typeStr === "sora2") {
-        throw new Error("sora2 is not supported first frame");
-      }
-      // 首尾帧
-      const res = await session.ai.framesToVideo({
-        type: opts.type as
-          | "vidu"
-          | "vidu-pro"
-          | "wan-flash"
-          | "pro"
-          | "veo3.1"
-          | "veo3.1-pro"
-          | "kling",
-        prompt,
-        start_frame: await getMaterialUri(session, opts.firstFrame),
-        end_frame: opts.lastFrame ? await getMaterialUri(session, opts.lastFrame) : undefined,
-        duration,
-        resolution: opts.resolution,
-        aspect_ratio: opts.aspectRatio,
-        mute: !opts.withAudio,
-        optimizeCameraMotion: opts.optimizeCameraMotion,
-        seed: opts.seed ? Number.parseInt(opts.seed, 10) : undefined,
-        onProgress: createProgressSpinner("inferencing"),
+      images.push({
+        type: "first_frame",
+        url: await getMaterialUri(session, opts.firstFrame),
       });
-      process.stdout.write("\n");
-      const output = typeof opts.output === "string" ? opts.output : undefined;
-      if (output) {
-        const dir = process.cwd();
-        const url = res.url;
-        const response = await fetch(url);
-        const buffer = Buffer.from(await response.arrayBuffer());
-        const filePath = path.resolve(dir, output);
-        if (!fs.existsSync(path.dirname(filePath))) {
-          fs.mkdirSync(path.dirname(filePath), { recursive: true });
-        }
-        fs.writeFileSync(filePath, buffer);
-        res.output = filePath;
-      }
-      console.log(res);
-    } else {
-      const refsList =
-        typeof opts.refs === "string" && opts.refs.length > 0
-          ? opts.refs
-              .split(",")
-              .map((s) => s.trim())
-              .filter((s) => s.length > 0)
-          : [];
-      const referenceImages = await Promise.all(
-        refsList.map(async (ref) => await getMaterialUri(session, ref))
-      );
-      let typeStr: string = type || "vidu";
-      if (typeStr === "seedance") type = "pro";
-      if (typeStr === "kling") type = "kling-o1";
-      // 多参
-      const res = await session.ai.referencesToVideo({
-        type: opts.type as
-          | "vidu"
-          | "vidu-pro"
-          | "sora2"
-          | "sora2-pro"
-          | "wan"
-          | "pro"
-          | "veo3.1"
-          | "veo3.1-pro"
-          | "kling",
-        prompt,
-        duration,
-        resolution: opts.resolution,
-        aspect_ratio: opts.aspectRatio,
-        mute: !opts.withAudio,
-        optimizeCameraMotion: opts.optimizeCameraMotion,
-        seed: opts.seed ? Number.parseInt(opts.seed, 10) : undefined,
-        reference_images: referenceImages,
-        onProgress: createProgressSpinner("inferencing"),
-      });
-      process.stdout.write("\n");
-      const output = typeof opts.output === "string" ? opts.output : undefined;
-      if (output) {
-        const dir = process.cwd();
-        const url = res.url;
-        const response = await fetch(url);
-        const buffer = Buffer.from(await response.arrayBuffer());
-        const filePath = path.resolve(dir, output);
-        if (!fs.existsSync(path.dirname(filePath))) {
-          fs.mkdirSync(path.dirname(filePath), { recursive: true });
-        }
-        fs.writeFileSync(filePath, buffer);
-        res.output = filePath;
-      }
-      console.log(res);
     }
+    if (opts.lastFrame) {
+      images.push({
+        type: "last_frame",
+        url: await getMaterialUri(session, opts.lastFrame),
+      });
+    }
+    const refsList =
+      typeof opts.refs === "string" && opts.refs.length > 0
+        ? opts.refs
+            .split(",")
+            .map((s) => s.trim())
+            .filter((s) => s.length > 0)
+        : [];
+    for (const ref of refsList) {
+      images.push({
+        type: "reference",
+        url: await getMaterialUri(session, ref),
+      });
+    }
+    const res = await session.ai.generateVideo({
+      prompt,
+      model: model as (typeof allowedTypes)[number],
+      duration: duration || undefined,
+      resolution: opts.resolution,
+      aspect_ratio: opts.aspectRatio,
+      mute: !opts.withAudio,
+      optimize_camera: opts.optimizeCameraMotion,
+      seed: opts.seed ? Number.parseInt(opts.seed, 10) : undefined,
+      images: images.length > 0 ? images : undefined,
+      onProgress: createProgressSpinner("inferencing"),
+    });
+    process.stdout.write("\n");
+    const output = typeof opts.output === "string" ? opts.output : undefined;
+    if (output) {
+      const dir = process.cwd();
+      const url = res.url;
+      const response = await fetch(url);
+      const buffer = Buffer.from(await response.arrayBuffer());
+      const filePath = path.resolve(dir, output);
+      if (!fs.existsSync(path.dirname(filePath))) {
+        fs.mkdirSync(path.dirname(filePath), { recursive: true });
+      }
+      fs.writeFileSync(filePath, buffer);
+      res.output = filePath;
+    }
+    console.log(res);
   }
 
   // default action on `zerocut video`
   parent
     .option("--prompt <prompt>", "Text prompt for video generation (required)")
     .option("--duration <duration>", "Video duration in seconds")
-    .option("--type <type>", `Generator type: ${allowedTypes.join("|")} (default: vidu)`)
+    .option("--video <video>", `Video model: ${allowedTypes.join("|")} (default: vidu)`)
     .option("--seed <seed>", "Random seed")
     .option("--firstFrame <image>", "First frame image path/url")
     .option("--lastFrame <image>", "Last frame image path/url")
@@ -194,7 +156,7 @@ export function register(program: Command): void {
     .description("Create a new video; requires --prompt")
     .option("--prompt <prompt>", "Text prompt for video generation (required)")
     .option("--duration <duration>", "Video duration in seconds")
-    .option("--type <type>", `Generator type: ${allowedTypes.join("|")} (default: vidu)`)
+    .option("--video <video>", `Video model: ${allowedTypes.join("|")} (default: vidu)`)
     .option("--seed <seed>", "Random seed")
     .option("--firstFrame <image>", "First frame image path/url")
     .option("--lastFrame <image>", "Last frame image path/url")

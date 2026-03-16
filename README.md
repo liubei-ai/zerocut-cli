@@ -109,7 +109,7 @@ zerocut config --ott <token> --region <cn|us>   # non-interactive
     - Options:
       - `--prompt <prompt>` (required)
       - `--duration <seconds>` (integer 1–16)
-    - `--type <type>` (enum: `zerocut3.0|seedance-1.5-pro|vidu|vidu-pro|viduq3|viduq3-turbo|kling|kling-v3|wan|wan-flash|sora2|sora2-pro|veo3.1|veo3.1-pro`; default `vidu`)
+      - `--video <model>` (enum: `zerocut3.0|seedance-1.5-pro|vidu|vidu-pro|viduq3|viduq3-turbo|kling|kling-v3|wan|wan-flash|sora2|sora2-pro|veo3.1|veo3.1-pro`; default `vidu`)
       - `--seed <seed>`
       - `--firstFrame <image>`
       - `--lastFrame <image>`
@@ -127,7 +127,7 @@ zerocut config --ott <token> --region <cn|us>   # non-interactive
 zerocut image --prompt "a cat" --model seedream --aspectRatio 1:1 --resolution 1K --refs ref1.png,ref2.jpg --output out.png
 
 # Create video (default action)
-zerocut video --prompt "city night drive" --duration 12 --type vidu --refs frame1.png,frame2.png --resolution 720p --output movie.mp4
+zerocut video --prompt "city night drive" --duration 12 --video vidu --refs frame1.png,frame2.png --resolution 720p --output movie.mp4
 ```
 
 ## Dynamic External Commands
