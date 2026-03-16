@@ -1,5 +1,5 @@
 import type { Command } from "commander";
-import { getMaterialUri, getSessionFromCommand } from "../services/cerevox";
+import { getMaterialUri, getSessionFromCommand, syncToTOS } from "../services/cerevox";
 import fs from "node:fs";
 import path from "node:path";
 import { createProgressSpinner } from "../utils/progress";
@@ -127,6 +127,14 @@ export function register(program: Command): void {
       images: images.length > 0 ? images : undefined,
       onProgress: createProgressSpinner("inferencing"),
     });
+    try {
+      if (res?.url) {
+        const tosUrl = await syncToTOS(res.url as string);
+        if (tosUrl) {
+          res.url = tosUrl;
+        }
+      }
+    } catch {}
     process.stdout.write("\n");
     const output = typeof opts.output === "string" ? opts.output : undefined;
     if (output) {

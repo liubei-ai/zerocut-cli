@@ -1,5 +1,5 @@
 import type { Command } from "commander";
-import { getSessionFromCommand } from "../services/cerevox";
+import { getSessionFromCommand, syncToTOS } from "../services/cerevox";
 import { createProgressSpinner } from "../utils/progress";
 
 export const name = "music";
@@ -29,6 +29,14 @@ export function register(program: Command): void {
       prompt,
       onProgress: createProgressSpinner("inferencing"),
     });
+    try {
+      if (res?.url) {
+        const tosUrl = await syncToTOS(res.url as string);
+        if (tosUrl) {
+          res.url = tosUrl;
+        }
+      }
+    } catch {}
     process.stdout.write("\n");
     console.log(res);
   }

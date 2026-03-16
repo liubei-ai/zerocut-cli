@@ -1,7 +1,7 @@
 import type { Command } from "commander";
 import fs from "node:fs";
 import path from "node:path";
-import { getMaterialUri, getSessionFromCommand } from "../services/cerevox";
+import { getMaterialUri, getSessionFromCommand, syncToTOS } from "../services/cerevox";
 import type { Session } from "cerevox";
 import { createProgressSpinner } from "../utils/progress";
 
@@ -72,10 +72,19 @@ export function register(program: Command): void {
     const res = await (session.ai.generateImage as (arg: Record<string, unknown>) => Promise<any>)(
       payload
     );
+    if (res?.urls && Array.isArray(res.urls) && res.urls.length > 0) {
+      try {
+        const tosUrl = await syncToTOS(res.urls[0]);
+        if (tosUrl) {
+          res.url = tosUrl;
+          res.urls[0] = tosUrl;
+        }
+      } catch {}
+    }
     process.stdout.write("\n");
     if (output) {
       const dir = process.cwd();
-      const url = res.urls[0];
+      const url = (res.url as string) ?? res.urls[0];
       const response = await fetch(url);
       const buffer = Buffer.from(await response.arrayBuffer());
       const filePath = path.resolve(dir, output);

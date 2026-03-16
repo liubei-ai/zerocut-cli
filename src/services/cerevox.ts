@@ -102,3 +102,26 @@ export async function getMaterialUri(
   }
   return url;
 }
+
+export async function syncToTOS(url: string): Promise<string> {
+  const api = "https://api.zerocut.cn/api/v1/upload/material";
+  const apiKey = getApiKey();
+  const headers = {
+    Authorization: `Bearer ${apiKey}`,
+    "Content-Type": "multipart/form-data",
+  };
+
+  const buffer = await fetch(url).then((res) => res.arrayBuffer());
+
+  const formData = new FormData();
+  formData.append("file", new Blob([buffer], { type: "application/octet-stream" }));
+  const res = await fetch(api, {
+    method: "POST",
+    headers,
+    body: formData,
+  });
+  if (res.status !== 200) {
+    throw new Error(`Failed to upload to TOS. Details: ${res.statusText}`);
+  }
+  return (await res.json()).data?.url || url;
+}
