@@ -26,6 +26,8 @@ function resolveResultUrl(result: unknown): string | undefined {
 }
 
 export function register(program: Command): void {
+  const avatarModels = ["zerocut-avatar-1.0", "zerocut-avatar-1.5"] as const;
+  const mvModels = ["zerocut-mv-1.0"] as const;
   const parent = program.command("video").description("Create a new video; requires --prompt");
 
   const allowedTypes = [
@@ -43,6 +45,8 @@ export function register(program: Command): void {
     "sora2-pro",
     "veo3.1",
     "veo3.1-pro",
+    ...avatarModels,
+    ...mvModels,
   ] as const;
 
   async function videoCreateAction(
@@ -86,10 +90,21 @@ export function register(program: Command): void {
     const durationStr = typeof opts.duration === "string" ? opts.duration.trim() : undefined;
     const sourceVideo = typeof opts.sourceVideo === "string" ? opts.sourceVideo.trim() : undefined;
     let duration: number = 0;
+    const durationRange = ((): { min: number; max: number } => {
+      if ((avatarModels as readonly string[]).includes(model)) {
+        return { min: 5, max: 240 };
+      }
+      if ((mvModels as readonly string[]).includes(model)) {
+        return { min: 1, max: 240 };
+      }
+      return { min: 1, max: 16 };
+    })();
     if (durationStr) {
       const n = Number.parseInt(durationStr, 10);
-      if (!Number.isFinite(n) || n < 1 || n > 16) {
-        process.stderr.write("Invalid value for --duration: must be integer 1-16\n");
+      if (!Number.isFinite(n) || n < durationRange.min || n > durationRange.max) {
+        process.stderr.write(
+          `Invalid value for --duration: model ${model} supports integer ${durationRange.min}-${durationRange.max}\n`
+        );
         process.exitCode = 1;
         return;
       }
@@ -137,7 +152,7 @@ export function register(program: Command): void {
     }
     const res = await session.ai.generateVideo({
       prompt,
-      model: model as (typeof allowedTypes)[number],
+      model: model as unknown as Parameters<typeof session.ai.generateVideo>[0]["model"],
       duration: duration || undefined,
       resolution: opts.resolution,
       aspect_ratio: aspectRatio,
@@ -192,7 +207,10 @@ export function register(program: Command): void {
   // default action on `zerocut video`
   parent
     .option("--prompt <prompt>", "Text prompt for video generation (required)")
-    .option("--duration <duration>", "Video duration in seconds (1-16)")
+    .option(
+      "--duration <duration>",
+      "Video duration in seconds (default models: 1-16, avatar: 5-240, mv: 1-240)"
+    )
     .option("--model <model>", `Video model: ${allowedTypes.join("|")} (default: vidu)`)
     .option("--sourceVideo <video>", "Base video path/url for edit mode (requires --duration 3-10)")
     .option("--seed <seed>", "Random seed")
@@ -211,7 +229,10 @@ export function register(program: Command): void {
     .command("create")
     .description("Create a new video; requires --prompt")
     .option("--prompt <prompt>", "Text prompt for video generation (required)")
-    .option("--duration <duration>", "Video duration in seconds (1-16)")
+    .option(
+      "--duration <duration>",
+      "Video duration in seconds (default models: 1-16, avatar: 5-240, mv: 1-240)"
+    )
     .option("--model <model>", `Video model: ${allowedTypes.join("|")} (default: vidu)`)
     .option("--sourceVideo <video>", "Base video path/url for edit mode (requires --duration 3-10)")
     .option("--seed <seed>", "Random seed")

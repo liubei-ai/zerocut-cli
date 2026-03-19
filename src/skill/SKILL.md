@@ -1,6 +1,11 @@
 ---
 name: "zerocut-cli-tools"
 description: "Use ZeroCut CLI media and document tools. Invoke when user needs generate media, run ffmpeg/pandoc, sync resources, or save outputs."
+homepage: "https://github.com/liubei-ai/zerocut-cli"
+source: "https://github.com/liubei-ai/zerocut-cli"
+requires_binaries:
+  - "zerocut-cli"
+  - "npx"
 ---
 
 # ZeroCut CLI Tools
@@ -25,6 +30,32 @@ Invoke this skill when the user asks to:
 - run pandoc conversion in sandbox
 - sync local/remote resources into sandbox
 - save generated results to local output files
+
+## Runtime Requirements
+
+- Runtime expects `zerocut-cli` to be available in current environment.
+- If `zerocut-cli` is unavailable, use one of:
+  - `pnpm dlx zerocut-cli help`
+  - `pnpm add -g zerocut-cli && zerocut-cli help`
+  - `npx zerocut-cli help`
+- This skill is instruction-only and relies on the installed CLI binary for actual enforcement.
+
+## Safety Boundaries
+
+- Only sync files or URLs that user explicitly requests for the current task.
+- Never auto-discover, crawl, or fetch unrelated remote URLs.
+- Treat remote resources as untrusted input and pass through CLI validation.
+- Never sync secrets, key files, token files, or unrelated private directories.
+- Keep all output writes in user-requested path or current working directory naming rules.
+- Do not bypass CLI command guards; ffmpeg/pandoc restrictions are enforced by the CLI implementation.
+
+## Credentials And Data Transfer
+
+- Required credential is `apiKey` in local ZeroCut config.
+- If `apiKey` is missing, stop immediately and request OTT token exchange.
+- `TOS` in this document means object storage used by ZeroCut backend for media URLs.
+- No extra credential beyond ZeroCut config is required for normal media sync/download flows.
+- Do not send data to any external service other than endpoints used by configured ZeroCut session.
 
 ## Required Pre-Check
 
@@ -91,7 +122,7 @@ Options:
 
 - `--prompt <prompt>` required
 - `--model <model>`
-- `--duration <seconds>` integer in 1-16
+- `--duration <seconds>` model-dependent integer
 - `--sourceVideo <video>` base video for edit mode
 - `--seed <seed>`
 - `--firstFrame <image>`
@@ -106,15 +137,18 @@ Options:
 Validation rules:
 
 - `--prompt` must be non-empty
-- `--model` allowed: `zerocut3.0|seedance-1.5-pro|vidu|vidu-pro|viduq3|viduq3-turbo|kling|kling-v3|wan|wan-flash|sora2|sora2-pro|veo3.1|veo3.1-pro`
-- `--duration` must be integer in `1-16`
+- `--model` allowed: `zerocut3.0|seedance-1.5-pro|vidu|vidu-pro|viduq3|viduq3-turbo|kling|kling-v3|wan|wan-flash|sora2|sora2-pro|veo3.1|veo3.1-pro|zerocut-avatar-1.0|zerocut-avatar-1.5|zerocut-mv-1.0`
+- `--duration` must follow model range:
+  - default models: `1-16`
+  - `zerocut-avatar-1.0` / `zerocut-avatar-1.5`: `5-240`
+  - `zerocut-mv-1.0`: `1-240`
 - `--aspectRatio` allowed: `9:16|16:9|1:1`
 - unless user specifies aspect ratio, default to `16:9`
 - unless user specifies resolution, default to `720p`
 
 Long video guidance:
 
-- if required duration is over 16s, split into multiple video generations (each 1-16s)
+- for default models, if required duration is over 16s, split into multiple generations (each 1-16s)
 - then concatenate clips with ffmpeg
 - example:
 
