@@ -45,7 +45,7 @@
     "typescript-eslint": "^8.54.0"
   },
   "dependencies": {
-    "cerevox": "^4.22.0",
+    "cerevox": "^4.29.3",
     "commander": "^14.0.3",
     "inquirer": "^13.2.2"
   }

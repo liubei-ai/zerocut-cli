@@ -110,7 +110,7 @@ zerocut config --ott <token> --region <cn|us>   # non-interactive
   - Options:
     - `--prompt <prompt>` (required)
     - `--duration <seconds>` (integer 1–16; when `--sourceVideo` is set, must be 3–10)
-    - `--model <model>` (enum: `zerocut3.0|seedance-1.5-pro|vidu|vidu-pro|viduq3|viduq3-turbo|kling|kling-v3|wan|wan-flash|sora2|sora2-pro|veo3.1|veo3.1-pro`; default `vidu`)
+    - `--model <model>` (enum: `zerocut3.0|zerocut3.0-pro|zerocut3.0-pro-fast|seedance-1.5-pro|vidu|vidu-pro|viduq3|viduq3-turbo|kling|kling-v3|wan|wan-flash|sora2|sora2-pro|veo3.1|veo3.1-pro`; default `vidu`)
     - `--sourceVideo <video>` (base video path/url for edit mode)
     - `--seed <seed>`
     - `--firstFrame <image>`

@@ -32,6 +32,8 @@ export function register(program: Command): void {
 
   const allowedTypes = [
     "zerocut3.0",
+    "zerocut3.0-pro",
+    "zerocut3.0-pro-fast",
     "seedance-1.5-pro",
     "vidu",
     "vidu-pro",
@@ -169,6 +171,7 @@ export function register(program: Command): void {
           ]
         : undefined,
       onProgress: createProgressSpinner("inferencing"),
+      timeout: 7_200_000,
     });
     const initialUrl = resolveResultUrl(res);
     try {
