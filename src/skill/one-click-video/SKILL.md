@@ -34,7 +34,7 @@ Based on user topic, purpose, duration, style, references, and subject assets:
 
 Required workflow:
 
-project preparation -> subject creation -> scene planning (ensure `./materials/scene-bible.md` exists) -> storyboard generation -> scene video generation -> BGM generation -> final composition
+project preparation -> subject creation -> scene planning (ensure `./scene-bible.md` exists) -> storyboard generation -> scene video generation -> BGM generation -> final composition
 
 ## Runtime Preparation
 
@@ -115,7 +115,7 @@ npx zerocut-cli image --prompt "<subject turnaround prompt>" --model banana2 --t
 
 ## Scene Planning And Scene-Bible Rules
 
-Scene planning is a critical quality gate. Before any storyboard or video generation, create a complete `./materials/scene-bible.md` and treat it as the single source of truth for all downstream prompts.
+Scene planning is a critical quality gate. Before any storyboard or video generation, create a complete `./scene-bible.md` and treat it as the single source of truth for all downstream prompts.
 
 ### Mandatory Scene-Bible Checklist
 
@@ -146,7 +146,7 @@ Scene planning is a critical quality gate. Before any storyboard or video genera
 
 ### Scene-Bible Template
 
-Use this structure when writing `./materials/scene-bible.md`:
+Use this structure when writing `./scene-bible.md`:
 
 ```markdown
 # Scene Bible
