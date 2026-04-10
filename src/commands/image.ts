@@ -19,6 +19,7 @@ export function register(program: Command): void {
     "banana2",
     "banana-pro",
     "wan",
+    "wan-pro",
   ] as const;
   type AllowedModel = (typeof allowedModels)[number];
   const allowedAspectRatios = [
@@ -67,6 +68,7 @@ export function register(program: Command): void {
       aspect_ratio: aspectRatio,
       resolution,
       reference_images: referenceImages,
+      sequential_image_generation: "disabled",
       onProgress,
     };
     const res = await (session.ai.generateImage as (arg: Record<string, unknown>) => Promise<any>)(
