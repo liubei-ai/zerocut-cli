@@ -33,5 +33,8 @@ export function register(program: Command): void {
 
   parent.action(() => {
     printSkill("../skill/SKILL.md");
+    process.stdout.write(
+      "\nPlease save the markdown above to zerocut/SKILL.md to create the skill.\n"
+    );
   });
 }
