@@ -284,6 +284,8 @@ For each scene, planning output must include:
 ## Storyboard Rules
 
 - Every scene must have a storyboard image.
+- Storyboard generation must use `npx zerocut-cli image` with `--type storyboard`.
+- `--type` value is strictly locked to `storyboard` for storyboard generation. Do not use `default`, `subject-turnaround`, or any other value.
 - Storyboard must include environment, subject position/action, framing, camera movement, rhythm, and key emotion.
 - If a subject appears in that scene, include matching subject references.
 - Storyboard prompts must be complete and self-contained.
