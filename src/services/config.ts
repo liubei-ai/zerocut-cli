@@ -204,7 +204,14 @@ export function applyConfigInterceptor(program: Command): void {
     const current = (actionCommand ?? thisCommand) as Command;
     const name = current?.name?.();
     const parentName = current?.parent?.name?.();
-    if (name === "help" || name === "skill" || name === "config" || parentName === "config") return;
+    if (
+      name === "help" ||
+      name === "skill" ||
+      name === "config" ||
+      parentName === "config" ||
+      parentName === "skill"
+    )
+      return;
     const ok = await ensureConfig();
     if (!ok) {
       process.exit(1);
@@ -217,7 +224,8 @@ export function applyConfigInterceptor(program: Command): void {
   });
   program.hook("postAction", async (thisCommand, actionCommand) => {
     const name = actionCommand?.name?.() ?? thisCommand?.name?.();
-    if (name === "help" || name === "skill") return;
+    const parentName = actionCommand?.parent?.name?.() ?? thisCommand?.parent?.name?.();
+    if (name === "help" || name === "skill" || parentName === "skill") return;
     try {
       const cmd = (actionCommand ?? thisCommand) as Command & {
         [SESSION_SYMBOL]?: import("cerevox").Session;

@@ -65,10 +65,12 @@ export function register(program: Command): void {
       firstFrame?: string;
       lastFrame?: string;
       storyboard?: string;
+      persons?: string;
       refs?: string;
       resolution?: "720p" | "1080p";
       aspectRatio?: "9:16" | "16:9" | "1:1";
       withAudio?: boolean;
+      withBGM?: string;
       optimizeCameraMotion?: boolean;
       output?: string;
     }
@@ -126,8 +128,21 @@ export function register(program: Command): void {
       return;
     }
     const aspectRatio = ar as (typeof allowedAspectRatios)[number] | undefined;
+    let withBGM = true;
+    if (typeof opts.withBGM === "string") {
+      const withBGMRaw = opts.withBGM.trim().toLowerCase();
+      if (withBGMRaw === "true") {
+        withBGM = true;
+      } else if (withBGMRaw === "false") {
+        withBGM = false;
+      } else {
+        process.stderr.write("Invalid value for --withBGM: expected true|false\n");
+        process.exitCode = 1;
+        return;
+      }
+    }
     const images: {
-      type: "first_frame" | "last_frame" | "reference" | "storyboard";
+      type: "first_frame" | "last_frame" | "reference" | "storyboard" | "person";
       url: string;
       name?: string;
     }[] = [];
@@ -149,6 +164,19 @@ export function register(program: Command): void {
         url: await getMaterialUri(session, opts.storyboard),
       });
     }
+    const personList =
+      typeof opts.persons === "string" && opts.persons.length > 0
+        ? opts.persons
+            .split(",")
+            .map((s) => s.trim())
+            .filter((s) => s.length > 0)
+        : [];
+    for (const person of personList) {
+      images.push({
+        type: "person",
+        url: await getMaterialUri(session, person),
+      });
+    }
     const refsList =
       typeof opts.refs === "string" && opts.refs.length > 0
         ? opts.refs
@@ -162,13 +190,14 @@ export function register(program: Command): void {
         url: await getMaterialUri(session, ref),
       });
     }
-    const res = await session.ai.generateVideo({
+    const request = {
       prompt,
       model: model as unknown as Parameters<typeof session.ai.generateVideo>[0]["model"],
       duration: duration || undefined,
       resolution: opts.resolution,
       aspect_ratio: aspectRatio,
       mute: !(opts.withAudio ?? true),
+      bgm: withBGM,
       optimize_camera: opts.optimizeCameraMotion,
       seed: opts.seed ? Number.parseInt(opts.seed, 10) : undefined,
       images: images.length > 0 ? images : undefined,
@@ -182,7 +211,8 @@ export function register(program: Command): void {
         : undefined,
       onProgress: createProgressSpinner("inferencing"),
       timeout: 7_200_000,
-    });
+    } as unknown as Parameters<typeof session.ai.generateVideo>[0];
+    const res = await session.ai.generateVideo(request);
     const initialUrl = resolveResultUrl(res);
     try {
       if (initialUrl) {
@@ -230,10 +260,12 @@ export function register(program: Command): void {
     .option("--firstFrame <image>", "First frame image path/url")
     .option("--lastFrame <image>", "Last frame image path/url")
     .option("--storyboard <image>", "Storyboard image path/url")
+    .option("--persons <persons>", "Comma-separated person image paths/urls")
     .option("--refs <refs>", "Comma-separated reference image/video paths/urls")
     .option("--resolution <resolution>", "Resolution, e.g., 720p")
     .option("--aspectRatio <ratio>", "Aspect ratio: 9:16|16:9|1:1")
     .option("--withAudio", "Include audio track")
+    .option("--withBGM <withBGM>", "Include background music: true|false (default: true)")
     .option("--optimizeCameraMotion", "Optimize camera motion")
     .option("--output <file>", "Output file path")
     .action(videoCreateAction);
@@ -253,10 +285,12 @@ export function register(program: Command): void {
     .option("--firstFrame <image>", "First frame image path/url")
     .option("--lastFrame <image>", "Last frame image path/url")
     .option("--storyboard <image>", "Storyboard image path/url")
+    .option("--persons <persons>", "Comma-separated person image paths/urls")
     .option("--refs <refs>", "Comma-separated reference image/video paths/urls")
     .option("--resolution <resolution>", "Resolution, e.g., 720p")
     .option("--aspectRatio <ratio>", "Aspect ratio: 9:16|16:9|1:1")
     .option("--withAudio", "Include audio track")
+    .option("--withBGM <withBGM>", "Include background music: true|false (default: true)")
     .option("--optimizeCameraMotion", "Optimize camera motion")
     .option("--output <file>", "Output file path")
     .action(videoCreateAction);

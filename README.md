@@ -101,7 +101,7 @@ zerocut config --ott <token> --region <cn|us>   # non-interactive
 - `image` — create a new image (default action; requires `--prompt`)
   - Options:
     - `--prompt <prompt>` (required)
-    - `--model <model>` (seedream|seedream-pro|seedream-5l|banana|banana2|banana-pro|wan)
+    - `--model <model>` (seedream|seedream-pro|seedream-5l|banana|banana2|banana-pro|wan|wan-pro)
     - `--aspectRatio <ratio>` (1:1|3:4|4:3|16:9|9:16|2:3|3:2|21:9|1:4|4:1|1:8|8:1)
     - `--resolution <resolution>` (1K|2K|4K)
     - `--refs <img1,img2,...>` (comma-separated paths/URLs)
@@ -116,10 +116,12 @@ zerocut config --ott <token> --region <cn|us>   # non-interactive
     - `--firstFrame <image>`
     - `--lastFrame <image>`
     - `--storyboard <image>`
+    - `--persons <persons>` (comma-separated person image paths/URLs)
     - `--refs <assets>`
     - `--resolution <resolution>`
     - `--aspectRatio <ratio>` (9:16|16:9|1:1)
     - `--withAudio`
+    - `--withBGM <withBGM>` (true|false, default true)
     - `--optimizeCameraMotion`
     - `--output <file>`
   - Notes:

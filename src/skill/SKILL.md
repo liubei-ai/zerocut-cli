@@ -81,6 +81,21 @@ Notes:
 
 ## Command Reference
 
+### skill
+
+Use `skill` command to fetch built-in skill markdown:
+
+```bash
+npx zerocut-cli skill
+npx zerocut-cli skill one-click-video
+npx zerocut-cli skill edit-video
+```
+
+Routing rules:
+
+- When user requests one-click video creation, run `npx zerocut-cli skill one-click-video` to get the sub-skill and execute.
+- When user requests video editing, run `npx zerocut-cli skill edit-video` to get the sub-skill and execute.
+
 ### image
 
 Default action: `create`
@@ -102,7 +117,7 @@ Options:
 Validation rules:
 
 - `--prompt` must be non-empty
-- `--model` allowed: `seedream|seedream-pro|seedream-5l|banana|banana2|banana-pro|wan`
+- `--model` allowed: `seedream|seedream-pro|seedream-5l|banana|banana2|banana-pro|wan|wan-pro`
 - `--aspectRatio` allowed: `1:1|3:4|4:3|16:9|9:16|2:3|3:2|21:9|1:4|4:1|1:8|8:1`
 - unless user specifies aspect ratio, default to `16:9`
 - `--resolution` allowed: `1K|2K|4K`
@@ -128,10 +143,12 @@ Options:
 - `--firstFrame <image>`
 - `--lastFrame <image>`
 - `--storyboard <image>`
+- `--persons <persons>`
 - `--refs <assets>`
 - `--resolution <resolution>`
 - `--aspectRatio <ratio>`
 - `--withAudio`
+- `--withBGM <withBGM>`
 - `--optimizeCameraMotion`
 - `--output <file>`
 
@@ -146,6 +163,7 @@ Validation rules:
 - `--aspectRatio` allowed: `9:16|16:9|1:1`
 - unless user specifies aspect ratio, default to `16:9`
 - unless user specifies resolution, default to `720p`
+- `--withBGM` allowed: `true|false`, default to `true`
 
 Long video guidance:
 

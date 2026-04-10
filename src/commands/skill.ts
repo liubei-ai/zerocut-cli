@@ -5,16 +5,33 @@ import path from "node:path";
 export const name = "skill";
 export const description = "Print built-in SKILL.md content";
 
+function printSkill(relativePath: string): void {
+  const filePath = path.resolve(__dirname, relativePath);
+  const content = fs.readFileSync(filePath, "utf8");
+  process.stdout.write(content);
+  if (!content.endsWith("\n")) {
+    process.stdout.write("\n");
+  }
+}
+
 export function register(program: Command): void {
-  program
-    .command("skill")
-    .description("Print built-in skill markdown")
+  const parent = program.command("skill").description("Print built-in skill markdown");
+
+  parent
+    .command("one-click-video")
+    .description("Print one-click-video skill markdown")
     .action(() => {
-      const filePath = path.resolve(__dirname, "../skill/SKILL.md");
-      const content = fs.readFileSync(filePath, "utf8");
-      process.stdout.write(content);
-      if (!content.endsWith("\n")) {
-        process.stdout.write("\n");
-      }
+      printSkill("../skill/one-click-video/SKILL.md");
     });
+
+  parent
+    .command("edit-video")
+    .description("Print edit-video skill markdown")
+    .action(() => {
+      printSkill("../skill/edit-video/SKILL.md");
+    });
+
+  parent.action(() => {
+    printSkill("../skill/SKILL.md");
+  });
 }
