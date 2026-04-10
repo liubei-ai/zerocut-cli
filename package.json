@@ -1,6 +1,6 @@
 {
   "name": "zerocut-cli",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "ZeroCut CLI: AI assistant CLI for creating and editing images/audio/video",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
-    "dev": "ts-node src/bin/zerocut.ts"
+    "dev": "ts-node src/bin/zerocut.ts",
+    "prepublishOnly": "pnpm run build"
   },
   "keywords": [
     "cli",
