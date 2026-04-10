@@ -1,6 +1,6 @@
 {
   "name": "zerocut-cli",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "ZeroCut CLI: AI assistant CLI for creating and editing images/audio/video",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

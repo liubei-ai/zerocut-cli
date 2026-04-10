@@ -96,7 +96,7 @@ export async function getMaterialUri(
     }
     const saveToPath = `/home/user/cerevox-zerocut/projects/${session.terminal.id}/materials/${fileName}`;
     const files = session.files;
-    await files.upload(localPath, saveToPath);
+    await files.upload(localPath, saveToPath, { overwrite: true });
   } else if (res.status > 299) {
     throw new Error(`Failed to get material from ${url}. Details: ${res.statusText}`);
   }

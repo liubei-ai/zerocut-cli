@@ -91,7 +91,7 @@ npx zerocut-cli config --ott <token> --region <cn|us>
 - If user provides script or key message, keep original intent, wording priority, and brand keywords.
 - If narration exists for a scene, inject it at the beginning of the scene video prompt with this exact format:
   - `【narration_tone】Narration:<text_content>\n`
-- `narration_tone` must follow the voice design rules in this skill.
+- `narration_tone` must be a concrete tone string derived from the voice formula, not a placeholder.
 - `text_content` must be written in the user-required language.
 - Estimate speech duration with normal-slow pace.
 - Per-scene narration/dialogue total should not exceed 12 seconds.
@@ -103,6 +103,17 @@ npx zerocut-cli config --ott <token> --region <cn|us>
 - Keep narration voice stable across the full video unless story explicitly changes narrator.
 - Use voice formula internally:
   - gender + age range + vocal traits + speaking pace + emotional baseline + language
+- Convert the formula into a concise `narration_tone` label and keep it stable across scenes.
+- `narration_tone` should explicitly encode the same dimensions as the formula.
+
+### Narration Tone Construction Example
+
+- Voice formula example:
+  - female + 20-25 + bright thin tone with slight breathiness + medium-slow pace + gentle restrained with subtle hesitation + Mandarin Chinese
+- Valid `narration_tone` example:
+  - `female_20-25_bright-breathy_medium-slow_gentle-hesitant_mandarin`
+- Prompt prefix example:
+  - `【female_20-25_bright-breathy_medium-slow_gentle-hesitant_mandarin】Narration:夜色刚落下，她把那封信重新折好，放回口袋。\n`
 
 ## Subject Creation Rules
 
