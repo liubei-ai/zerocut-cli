@@ -102,6 +102,7 @@ zerocut config --ott <token> --region <cn|us>   # non-interactive
   - Options:
     - `--prompt <prompt>` (required)
     - `--model <model>` (seedream|seedream-pro|seedream-5l|banana|banana2|banana-pro|wan|wan-pro)
+    - `--type <type>` (default|storyboard|subject-turnaround, default: default)
     - `--aspectRatio <ratio>` (1:1|3:4|4:3|16:9|9:16|2:3|3:2|21:9|1:4|4:1|1:8|8:1)
     - `--resolution <resolution>` (1K|2K|4K)
     - `--refs <img1,img2,...>` (comma-separated paths/URLs)
@@ -158,7 +159,7 @@ zerocut config --ott <token> --region <cn|us>   # non-interactive
 
 ```bash
 # Create an image (default action)
-npx zerocut-cli image --prompt "a cat" --model seedream --aspectRatio 1:1 --resolution 1K --refs ref1.png,ref2.jpg --output out.png
+npx zerocut-cli image --prompt "a cat" --model seedream --type default --aspectRatio 1:1 --resolution 1K --refs ref1.png,ref2.jpg --output out.png
 
 # Create video (default action)
 npx zerocut-cli video --prompt "city night drive" --duration 12 --model vidu --refs frame1.png,frame2.png --resolution 720p --output movie.mp4

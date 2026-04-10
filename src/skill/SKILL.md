@@ -102,13 +102,14 @@ Default action: `create`
 
 ```bash
 npx zerocut-cli image --prompt "a cat on a bike" --output out.png
-npx zerocut-cli image create --prompt "a cat on a bike" --model seedream-5l --aspectRatio 1:1 --resolution 1K --refs ref1.png,ref2.jpg --output out.png
+npx zerocut-cli image create --prompt "a cat on a bike" --model seedream-5l --type default --aspectRatio 1:1 --resolution 1K --refs ref1.png,ref2.jpg --output out.png
 ```
 
 Options:
 
 - `--prompt <prompt>` required
 - `--model <model>`
+- `--type <type>`
 - `--aspectRatio <ratio>`
 - `--resolution <resolution>`
 - `--refs <refs>` comma-separated local paths or URLs
@@ -118,6 +119,8 @@ Validation rules:
 
 - `--prompt` must be non-empty
 - `--model` allowed: `seedream|seedream-pro|seedream-5l|banana|banana2|banana-pro|wan|wan-pro`
+- `--type` allowed: `default|storyboard|subject-turnaround`
+- unless user specifies type, default to `default`
 - `--aspectRatio` allowed: `1:1|3:4|4:3|16:9|9:16|2:3|3:2|21:9|1:4|4:1|1:8|8:1`
 - unless user specifies aspect ratio, default to `16:9`
 - `--resolution` allowed: `1K|2K|4K`

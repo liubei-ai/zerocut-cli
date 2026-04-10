@@ -216,24 +216,25 @@ export async function runFFMpegCommand(
   });
 
   const outputFilePath = trimmedCommand.startsWith("ffmpeg")
-    ? finalCommand.split(" ").pop() || ""
+    ? (finalCommand.split(" ").pop() || "").replace(/^["']|["']$/g, "")
     : "";
   const sandboxFilePath = join(workDir, outputFilePath);
+  let tosUrl: string | undefined;
 
   // 等待命令完成
   const result = await response.json();
   if (result.exitCode === 0 && outputFilePath) {
     const savePath = join(process.cwd(), basename(outputFilePath));
-
-    console.log(sandboxFilePath, savePath);
-
     const files = session.files;
     await files.download(sandboxFilePath, savePath);
+    const sandboxUrl = await getMaterialUri(session, savePath);
+    tosUrl = await syncToTOS(sandboxUrl);
   }
 
   return {
     exitCode: result.exitCode,
     outputFilePath,
+    tosUrl,
     data: {
       stdout: result.stdout || (!result.exitCode && result.stderr) || "",
       stderr: result.exitCode ? result.stderr : undefined,

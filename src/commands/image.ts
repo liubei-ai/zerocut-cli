@@ -39,12 +39,15 @@ export function register(program: Command): void {
   type AllowedAspectRatio = (typeof allowedAspectRatios)[number];
   const allowedResolutions = ["1K", "2K", "4K"] as const;
   type AllowedResolution = (typeof allowedResolutions)[number];
+  const allowedTypes = ["default", "storyboard", "subject-turnaround"] as const;
+  type AllowedType = (typeof allowedTypes)[number];
 
   async function performImageGeneration(
     session: Session,
     {
       prompt,
       model,
+      type,
       aspectRatio,
       resolution,
       refsList,
@@ -52,6 +55,7 @@ export function register(program: Command): void {
     }: {
       prompt: string;
       model?: AllowedModel;
+      type: AllowedType;
       aspectRatio?: AllowedAspectRatio;
       resolution?: AllowedResolution;
       refsList: string[];
@@ -64,6 +68,7 @@ export function register(program: Command): void {
     const onProgress = createProgressSpinner("inferencing");
     const payload: Record<string, unknown> = {
       model: model || "seedream-5l",
+      type,
       prompt,
       aspect_ratio: aspectRatio,
       resolution,
@@ -104,6 +109,7 @@ export function register(program: Command): void {
     opts: {
       prompt?: string;
       model?: string;
+      type?: string;
       aspectRatio?: string;
       resolution?: string;
       refs?: string;
@@ -130,6 +136,15 @@ export function register(program: Command): void {
       return;
     }
     const modelArg: AllowedModel | undefined = (model ?? undefined) as AllowedModel | undefined;
+    const type = typeof opts.type === "string" ? opts.type.trim() : "default";
+    if (!(allowedTypes as readonly string[]).includes(type)) {
+      process.stderr.write(
+        `Invalid value for --type: ${type}. Allowed: ${allowedTypes.join("|")}\n`
+      );
+      process.exitCode = 1;
+      return;
+    }
+    const typeArg: AllowedType = type as AllowedType;
     const aspectRatio =
       typeof opts.aspectRatio === "string"
         ? (opts.aspectRatio.trim() as AllowedAspectRatio)
@@ -163,6 +178,7 @@ export function register(program: Command): void {
     await performImageGeneration(session, {
       prompt,
       model: modelArg,
+      type: typeArg,
       aspectRatio,
       resolution,
       refsList,
@@ -174,6 +190,7 @@ export function register(program: Command): void {
   parent
     .option("--prompt <prompt>", "Text prompt for image generation (required)")
     .option("--model <model>", `Generator model: ${allowedModels.join("|")}`)
+    .option("--type <type>", `Image type: ${allowedTypes.join("|")}`)
     .option("--aspectRatio <ratio>", `Aspect ratio: ${allowedAspectRatios.join("|")}`)
     .option("--resolution <resolution>", `Resolution: ${allowedResolutions.join("|")}`)
     .option("--refs <refs>", "Comma-separated reference image paths/urls")
@@ -186,6 +203,7 @@ export function register(program: Command): void {
     .description("Create a new image; requires --prompt")
     .option("--prompt <prompt>", "Text prompt for image generation (required)")
     .option("--model <model>", `Generator model: ${allowedModels.join("|")}`)
+    .option("--type <type>", `Image type: ${allowedTypes.join("|")}`)
     .option("--aspectRatio <ratio>", `Aspect ratio: ${allowedAspectRatios.join("|")}`)
     .option("--resolution <resolution>", `Resolution: ${allowedResolutions.join("|")}`)
     .option("--refs <refs>", "Comma-separated reference image paths/urls")
