@@ -34,7 +34,10 @@ export function register(program: Command): void {
     "zerocut3.0",
     "zerocut3.0-pro",
     "zerocut3.0-pro-fast",
+    "zerocut3.0-turbo",
     "seedance-1.5-pro",
+    "seedance-2.0",
+    "seedance-2.0-fast",
     "vidu",
     "vidu-pro",
     "viduq3",
@@ -61,6 +64,7 @@ export function register(program: Command): void {
       seed?: string;
       firstFrame?: string;
       lastFrame?: string;
+      storyboard?: string;
       refs?: string;
       resolution?: "720p" | "1080p";
       aspectRatio?: "9:16" | "16:9" | "1:1";
@@ -137,6 +141,12 @@ export function register(program: Command): void {
       images.push({
         type: "last_frame",
         url: await getMaterialUri(session, opts.lastFrame),
+      });
+    }
+    if (opts.storyboard) {
+      images.push({
+        type: "storyboard",
+        url: await getMaterialUri(session, opts.storyboard),
       });
     }
     const refsList =
@@ -219,6 +229,7 @@ export function register(program: Command): void {
     .option("--seed <seed>", "Random seed")
     .option("--firstFrame <image>", "First frame image path/url")
     .option("--lastFrame <image>", "Last frame image path/url")
+    .option("--storyboard <image>", "Storyboard image path/url")
     .option("--refs <refs>", "Comma-separated reference image/video paths/urls")
     .option("--resolution <resolution>", "Resolution, e.g., 720p")
     .option("--aspectRatio <ratio>", "Aspect ratio: 9:16|16:9|1:1")
@@ -241,6 +252,7 @@ export function register(program: Command): void {
     .option("--seed <seed>", "Random seed")
     .option("--firstFrame <image>", "First frame image path/url")
     .option("--lastFrame <image>", "Last frame image path/url")
+    .option("--storyboard <image>", "Storyboard image path/url")
     .option("--refs <refs>", "Comma-separated reference image/video paths/urls")
     .option("--resolution <resolution>", "Resolution, e.g., 720p")
     .option("--aspectRatio <ratio>", "Aspect ratio: 9:16|16:9|1:1")
