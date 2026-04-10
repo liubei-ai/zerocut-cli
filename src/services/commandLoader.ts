@@ -10,6 +10,7 @@ import { register as registerPandoc } from "../commands/pandoc";
 import { register as registerSkill } from "../commands/skill";
 import fs from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 export function loadBuiltInCommands(program: Command): void {
   registerHelp(program);
@@ -31,7 +32,8 @@ export async function loadExternalCommandsAsync(program: Command, dir?: string):
   for (const f of files) {
     const full = path.join(d, f);
     try {
-      const mod = (await import(full)) as {
+      const moduleSpecifier = pathToFileURL(full).href;
+      const mod = (await import(moduleSpecifier)) as {
         register?: (p: Command) => void;
         default?: (p: Command) => void;
       };
