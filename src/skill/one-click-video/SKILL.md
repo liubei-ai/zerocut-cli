@@ -89,6 +89,10 @@ npx zerocut-cli config --ott <token> --region <cn|us>
 
 - If user does not provide exact script, generate concise narration/dialogue aligned with story and duration.
 - If user provides script or key message, keep original intent, wording priority, and brand keywords.
+- If narration exists for a scene, inject it at the beginning of the scene video prompt with this exact format:
+  - `【narration_tone】Narration:<text_content>\n`
+- `narration_tone` must follow the voice design rules in this skill.
+- `text_content` must be written in the user-required language.
 - Estimate speech duration with normal-slow pace.
 - Per-scene narration/dialogue total should not exceed 12 seconds.
 - If over limit, compress script or split into more scenes.
@@ -136,7 +140,7 @@ Scene planning is a critical quality gate. Before any storyboard or video genera
 7. **Shot plan per scene**
    - each shot has self-contained prompt requirements and camera intention
 8. **Narration/dialogue plan**
-   - per scene script and estimated speech duration (must stay within 12s per scene)
+   - per scene script, narration tone, language, and estimated speech duration (must stay within 12s per scene)
 9. **Asset binding**
    - which references are required for each scene (`--storyboard`, `--persons`, `--refs`)
 10. **Output plan**
@@ -295,6 +299,8 @@ If no subject references are required in that scene, omit `--refs`.
 ## Prompt Independence Hard Constraint
 
 - Every shot prompt and every scene video prompt must be fully self-contained.
+- If narration is present, the prompt must start with `【narration_tone】Narration:<text_content>\n`.
+- Validate narration before generation: tone must match voice design and text language must match user requirement.
 - Do not use shorthand such as:
   - "same as previous shot"
   - "continue above"
