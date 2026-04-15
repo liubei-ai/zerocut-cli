@@ -66,12 +66,12 @@ npx zerocut-cli config --ott <token> --region <cn|us>
 
 ### Video model policy
 
-- Default video model is `seedance-2.0-turbo` when user does not explicitly specify a compliant model.
+- Default video model is `zerocut3.0-turbo` when user does not explicitly specify a compliant model.
 - Allowed video models in this skill:
+  - `zerocut3.0-turbo`
   - `seedance-2.0`
-  - `seedance-2.0-turbo`
   - `seedance-2.0-fast`
-- If user requests an unsupported video model, fallback to `seedance-2.0-turbo`.
+- If user requests an unsupported video model, fallback to `zerocut3.0-turbo`.
 
 ### Priority
 
@@ -355,7 +355,7 @@ Scene video example:
 ```bash
 npx zerocut-cli video \
   --prompt "<self-contained scene video prompt>" \
-  --model seedance-2.0-turbo \
+  --model zerocut3.0-turbo \
   --duration 12 \
   --resolution 720p \
   --aspectRatio 16:9 \
