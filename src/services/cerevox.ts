@@ -35,17 +35,35 @@ export async function openSession(): Promise<Session> {
   const cerevox = new Cerevox({
     apiKey,
   });
+  const sandboxTtlMs = 90 * 60 * 1000;
+  const now = Date.now();
   let sandboxId = getConfigValueSync("sandboxId") as string | undefined;
+  const sandboxIdExpireAtRaw = getConfigValueSync("sandboxIdExpireAt");
+  const sandboxIdExpireAt =
+    typeof sandboxIdExpireAtRaw === "number"
+      ? sandboxIdExpireAtRaw
+      : typeof sandboxIdExpireAtRaw === "string"
+        ? Number.parseInt(sandboxIdExpireAtRaw, 10)
+        : NaN;
+  if (!Number.isFinite(sandboxIdExpireAt) || now > sandboxIdExpireAt) {
+    sandboxId = undefined;
+    setConfigValueSync("sandboxId", null);
+    setConfigValueSync("sandboxIdExpireAt", null);
+  }
   if (sandboxId) {
     try {
-      return await cerevox.connect(sandboxId, 300_000);
+      const session = await cerevox.connect(sandboxId, 300_000);
+      setConfigValueSync("sandboxId", session.sandbox.sandboxId ?? sandboxId);
+      setConfigValueSync("sandboxIdExpireAt", Date.now() + sandboxTtlMs);
+      return session;
     } catch {
       sandboxId = undefined;
     }
   }
-  const session = await cerevox.launch({ timeout: 60, region });
+  const session = await cerevox.launch({ timeout: 120, region });
   sandboxId = session.sandbox.sandboxId!;
   setConfigValueSync("sandboxId", sandboxId);
+  setConfigValueSync("sandboxIdExpireAt", Date.now() + sandboxTtlMs);
   return session;
 }
 
