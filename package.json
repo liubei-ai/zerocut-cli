@@ -1,6 +1,6 @@
 {
   "name": "zerocut-cli",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "description": "ZeroCut CLI: AI assistant CLI for creating and editing images/audio/video",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -46,7 +46,7 @@
     "typescript-eslint": "^8.54.0"
   },
   "dependencies": {
-    "cerevox": "^4.50.3",
+    "cerevox": "^4.50.4",
     "commander": "^14.0.3",
     "inquirer": "^13.2.2"
   }
