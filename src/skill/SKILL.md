@@ -158,7 +158,7 @@ Options:
 Validation rules:
 
 - `--prompt` must be non-empty
-- `--model` allowed: `zerocut3.0|zerocut3.0-pro|zerocut3.0-pro-fast|zerocut3.0-turbo|seedance-1.5-pro|seedance-2.0|seedance-2.0-fast|vidu|vidu-pro|viduq3|viduq3-turbo|kling|kling-v3|wan|wan-flash|sora2|sora2-pro|veo3.1|veo3.1-pro|zerocut-avatar-1.0|zerocut-avatar-1.5|zerocut-mv-1.0`
+- `--model` allowed: `zerocut3.0|zerocut3.0-pro|zerocut3.0-pro-fast|zerocut3.0-turbo|seedance-1.5-pro|seedance-2.0|seedance-2.0-fast|vidu|vidu-pro|viduq3|viduq3-turbo|kling|kling-v3|wan|wan-flash|pixverse|sora2|sora2-pro|veo3.1|veo3.1-pro|zerocut-avatar-1.0|zerocut-avatar-1.5|zerocut-mv-1.0`
 - `--duration` must follow model range:
   - default models: `1-16`
   - `zerocut-avatar-1.0` / `zerocut-avatar-1.5`: `5-240`

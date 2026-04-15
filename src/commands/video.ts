@@ -46,6 +46,7 @@ export function register(program: Command): void {
     "kling-v3",
     "wan",
     "wan-flash",
+    "pixverse",
     "sora2",
     "sora2-pro",
     "veo3.1",
