@@ -185,13 +185,16 @@ export function register(program: Command): void {
             .map((s) => s.trim())
             .filter((s) => s.length > 0)
         : [];
+    const referenceUrls: string[] = [];
     for (const ref of refsList) {
+      const refUrl = await getMaterialUri(session, ref);
+      referenceUrls.push(refUrl);
       images.push({
         type: "reference",
-        url: await getMaterialUri(session, ref),
+        url: refUrl,
       });
     }
-    const request = {
+    const request: Record<string, unknown> = {
       prompt,
       model: model as unknown as Parameters<typeof session.ai.generateVideo>[0]["model"],
       duration: duration || undefined,
@@ -212,8 +215,15 @@ export function register(program: Command): void {
         : undefined,
       onProgress: createProgressSpinner("inferencing"),
       timeout: 7_200_000,
-    } as unknown as Parameters<typeof session.ai.generateVideo>[0];
-    const res = await session.ai.generateVideo(request);
+    };
+    if (referenceUrls.length > 0) {
+      // Backward/forward compatibility for models with different reference-image schemas.
+      request.refs = referenceUrls;
+      request.reference_images = referenceUrls.map((url) => ({ url }));
+    }
+    const res = await session.ai.generateVideo(
+      request as unknown as Parameters<typeof session.ai.generateVideo>[0]
+    );
     const initialUrl = resolveResultUrl(res);
     try {
       if (initialUrl) {
@@ -232,6 +242,11 @@ export function register(program: Command): void {
         process.stderr.write(
           "Cannot save --output because no video URL was returned. Please retry later or run without --output to inspect raw response.\n"
         );
+        if (referenceUrls.length > 0) {
+          process.stderr.write(
+            "Hint: this model may reject current --refs format. Try `--model vidu` for comparison, or run without --output to inspect raw response details.\n"
+          );
+        }
         process.exitCode = 1;
         console.log(res);
         return;

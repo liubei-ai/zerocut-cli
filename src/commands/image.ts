@@ -91,7 +91,20 @@ export function register(program: Command): void {
     process.stdout.write("\n");
     if (output) {
       const dir = process.cwd();
-      const url = (res.url as string) ?? res.urls[0];
+      const url =
+        typeof res?.url === "string" && res.url.length > 0
+          ? (res.url as string)
+          : Array.isArray(res?.urls) && typeof res.urls[0] === "string" && res.urls[0].length > 0
+            ? (res.urls[0] as string)
+            : undefined;
+      if (!url) {
+        process.stderr.write(
+          "Cannot save --output because no image URL was returned. Please retry later or run without --output to inspect raw response.\n"
+        );
+        process.exitCode = 1;
+        console.log(res);
+        return;
+      }
       const response = await fetch(url);
       const buffer = Buffer.from(await response.arrayBuffer());
       const filePath = path.resolve(dir, output);

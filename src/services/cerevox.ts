@@ -112,7 +112,7 @@ export async function getMaterialUri(
         );
       }
     }
-    const saveToPath = `/home/user/cerevox-zerocut/projects/${session.terminal.id}/materials/${fileName}`;
+    const saveToPath = `/home/user/cerevox-zerocut/projects/${session.terminal.id}/materials/${basename(fileName)}`;
     const files = session.files;
     await files.upload(localPath, saveToPath, { overwrite: true });
   } else if (res.status > 299) {
